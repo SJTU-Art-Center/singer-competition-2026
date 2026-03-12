@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getFullAvatarUrl } from '../utils/avatar';
+import { getFullAvatarUrl } from '../../utils/avatar';
 
 export default function PickOpponent({ gameState }) {
     const { players, pickingChallengerId, pkMatches = [] } = gameState;

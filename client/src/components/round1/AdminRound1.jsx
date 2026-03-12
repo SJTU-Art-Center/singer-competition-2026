@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getFullAvatarUrl } from '../utils/avatar';
+import { getFullAvatarUrl } from '../../utils/avatar';
 
 export default function AdminRound1({ gameState, updateState }) {
     const [selectedPlayerId, setSelectedPlayerId] = useState(null);

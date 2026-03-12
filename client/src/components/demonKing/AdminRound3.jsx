@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getFullAvatarUrl } from '../utils/avatar';
+import { getFullAvatarUrl } from '../../utils/avatar';
 
 export default function AdminRound3({ gameState, updateState }) {
     // 计算16入平均分

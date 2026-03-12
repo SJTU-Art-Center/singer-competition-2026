@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getFullAvatarUrl } from '../utils/avatar';
+import { getFullAvatarUrl } from '../../utils/avatar';
 
 export default function AdminPickOpponent({ gameState, updateState }) {
     const sortedPlayers = [...gameState.players].sort((a, b) => {

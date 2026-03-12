@@ -1,10 +1,10 @@
 import React from 'react';
 import { useGameState } from '../hooks/useGameState';
-import AdminRound1 from '../components/AdminRound1';
-import AdminRound2 from '../components/AdminRound2';
-import AdminRound3 from '../components/AdminRound3';
-import AdminRound4 from '../components/AdminRound4';
-import AdminPickOpponent from '../components/AdminPickOpponent';
+import AdminRound1 from '../components/round1/AdminRound1';
+import AdminRound2 from '../components/round2/AdminRound2';
+import AdminRound3 from '../components/demonKing/AdminRound3';
+import AdminRound4 from '../components/final/AdminRound4';
+import AdminPickOpponent from '../components/transition/AdminPickOpponent';
 import PlayerManager from '../components/PlayerManager';
 
 export default function Admin() {

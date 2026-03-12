@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getFullAvatarUrl } from '../utils/avatar';
+import { getFullAvatarUrl } from '../../utils/avatar';
 
 export default function AdminRound2({ gameState, updateState }) {
     // 分离出挑战者(11-18) 和 擂主(3-10)

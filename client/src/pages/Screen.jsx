@@ -1,10 +1,10 @@
 import React from 'react';
 import { useGameState } from '../hooks/useGameState';
-import RankList from '../components/RankList';
-import PkBattle from '../components/PkBattle';
-import DemonKing from '../components/DemonKing';
-import Resurrection from '../components/Resurrection';
-import PickOpponent from '../components/PickOpponent';
+import RankList from '../components/round1/RankList';
+import PkBattle from '../components/round2/PkBattle';
+import DemonKing from '../components/demonKing/DemonKing';
+import Resurrection from '../components/final/Resurrection';
+import PickOpponent from '../components/transition/PickOpponent';
 
 export default function Screen() {
     const { gameState } = useGameState();
