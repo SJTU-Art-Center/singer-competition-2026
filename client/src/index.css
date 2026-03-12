@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .text-shadow-glow {
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5);
+  }
+}
+
+:root {
+  --color-bg-base: #0f172a;
+  --color-bg-screen: #0b1121;
+  --color-text-main: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-card-bg: rgba(30, 41, 59, 0.7);
+  --color-card-border: rgba(51, 65, 85, 0.8);
+  --color-glow-1: rgba(30, 58, 138, 0.4);
+  --color-glow-2: rgba(88, 28, 135, 0.4);
+  --title-gradient-from: #fcd34d;
+  /* amber-300 */
+  --title-gradient-to: #ea580c;
+  /* orange-600 */
+  /* Score Ranks */
+  --rank-king-bg: linear-gradient(to right, #b91c1c, #881337);
+  --rank-king-border: #ef4444;
+  --rank-king-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+  --rank-king-text: #ffffff;
+
+  --rank-master-bg: linear-gradient(to right, #d97706, #78350f);
+  --rank-master-border: #fbbf24;
+  --rank-master-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+  --rank-master-text: #ffffff;
+
+  --rank-challenger-bg: linear-gradient(to right, #1d4ed8, #312e81);
+  --rank-challenger-border: #60a5fa;
+  --rank-challenger-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+  --rank-challenger-text: #ffffff;
+
+  --rank-eliminated-bg: #1e293b;
+  --rank-eliminated-border: #334155;
+  --rank-eliminated-shadow: none;
+  --rank-eliminated-text: #94a3b8;
+}
+
+.theme-gold {
+  --color-bg-base: #0a0a0a;
+  --color-bg-screen: #000000;
+  --color-text-main: #fdf6e3;
+  --color-text-muted: #d4af37;
+  --color-card-bg: rgba(20, 20, 20, 0.85);
+  --color-card-border: rgba(212, 175, 55, 0.4);
+  --color-glow-1: rgba(212, 175, 55, 0.15);
+  --color-glow-2: rgba(138, 108, 28, 0.15);
+  --title-gradient-from: #fde047;
+  --title-gradient-to: #d4af37;
+
+  --rank-king-bg: linear-gradient(to right, #27272a, #000000);
+  --rank-king-border: #facc15;
+  --rank-king-shadow: 0 0 20px rgba(250, 204, 21, 0.5);
+  --rank-king-text: #fde047;
+
+  --rank-master-bg: linear-gradient(to right, #18181b, #000000);
+  --rank-master-border: #a1a1aa;
+  --rank-master-shadow: 0 0 15px rgba(161, 161, 170, 0.3);
+  --rank-master-text: #e4e4e7;
+
+  --rank-challenger-bg: linear-gradient(to right, #09090b, #000000);
+  --rank-challenger-border: #52525b;
+  --rank-challenger-shadow: 0 0 10px rgba(82, 82, 91, 0.2);
+  --rank-challenger-text: #a1a1aa;
+
+  --rank-eliminated-bg: #000000;
+  --rank-eliminated-border: #27272a;
+  --rank-eliminated-shadow: none;
+  --rank-eliminated-text: #52525b;
+}
+
+.theme-light {
+  --color-bg-base: #f1f5f9;
+  --color-bg-screen: #ffffff;
+  --color-text-main: #0f172a;
+  --color-text-muted: #475569;
+  --color-card-bg: rgba(255, 255, 255, 0.85);
+  --color-card-border: rgba(203, 213, 225, 0.8);
+  --color-glow-1: rgba(56, 189, 248, 0.2);
+  --color-glow-2: rgba(52, 211, 153, 0.2);
+  --title-gradient-from: #0284c7;
+  --title-gradient-to: #059669;
+
+  --rank-king-bg: linear-gradient(to right, #ffe4e6, #fecdd3);
+  --rank-king-border: #f43f5e;
+  --rank-king-shadow: 0 0 20px rgba(244, 63, 94, 0.3);
+  --rank-king-text: #881337;
+
+  --rank-master-bg: linear-gradient(to right, #fef3c7, #fde68a);
+  --rank-master-border: #f59e0b;
+  --rank-master-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+  --rank-master-text: #78350f;
+
+  --rank-challenger-bg: linear-gradient(to right, #e0f2fe, #bae6fd);
+  --rank-challenger-border: #0ea5e9;
+  --rank-challenger-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
+  --rank-challenger-text: #0c4a6e;
+
+  --rank-eliminated-bg: #f8fafc;
+  --rank-eliminated-border: #e2e8f0;
+  --rank-eliminated-shadow: none;
+  --rank-eliminated-text: #94a3b8;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-main);
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.5);
+  border-radius: 4px;
+}
