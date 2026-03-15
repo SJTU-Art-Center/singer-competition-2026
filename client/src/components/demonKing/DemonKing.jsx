@@ -34,17 +34,22 @@ export default function DemonKing({ gameState }) {
             <motion.h2
                 initial={{ y: -50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="text-[2.7rem] font-black mt-[58px] mb-3 text-transparent bg-clip-text bg-gradient-to-b from-teal-400 to-emerald-700 tracking-[0.3em] italic"
+                className="text-[2.7rem] font-black mt-[50px] mb-3 text-transparent bg-clip-text bg-gradient-to-b from-teal-400 to-emerald-700 tracking-[0.3em] italic"
             >
                 大魔王降临
             </motion.h2>
 
             <div className="w-full flex-1 min-h-0 relative z-10 flex items-center justify-center overflow-hidden">
-                <div className="w-full max-w-[640px] translate-y-[2%]">
+                <div className="w-full max-w-[640px] translate-y-0">
                     <motion.div
-                        animate={{ scale: isSuccess ? 1.03 : 1, y: isSuccess ? -8 : (isFailed ? 14 : 0) }}
+                        animate={{
+                            scale: isSuccess ? 1.03 : (isFailed ? 0.9 : 1),
+                            y: isSuccess ? -8 : 0,
+                            opacity: isFailed ? 0.9 : 1,
+                            filter: isFailed ? 'grayscale(60%)' : 'grayscale(0%)'
+                        }}
                         transition={{ type: 'spring' }}
-                        className={`bg-[var(--color-card-bg)] border-2 rounded-3xl px-5 pt-4 pb-3.5 flex flex-col items-center w-full relative overflow-hidden backdrop-blur-xl ${isSuccess ? 'border-emerald-400 shadow-[0_4px_20px_rgba(16,185,129,0.35)]' : (isFailed ? 'border-slate-600 grayscale brightness-75' : 'border-teal-500 shadow-lg')}`}
+                        className={`bg-[var(--color-card-bg)] border-2 rounded-3xl px-5 pt-4 pb-3.5 flex flex-col items-center w-full relative overflow-hidden backdrop-blur-xl ${isSuccess ? 'border-emerald-400 shadow-[0_4px_20px_rgba(16,185,129,0.35)]' : (isFailed ? 'border-slate-500 shadow-[0_0_14px_rgba(34,211,238,0.25)]' : 'border-teal-500 shadow-lg')}`}
                     >
                     <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.65),0_0_24px_rgba(20,184,166,0.18)] mt-3 mb-4">
                         <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className={`w-30 h-30 rounded-full border-[3px] object-cover block ${isSuccess ? 'border-emerald-400/60' : 'border-teal-500/40'}`} />
@@ -78,7 +83,7 @@ export default function DemonKing({ gameState }) {
                                     initial={{ opacity: 0, y: 50, scale: 0.8 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     transition={{ delay: 1.5, type: 'spring' }}
-                                    className={`w-[88%] mt-3.5 py-2.5 text-center text-[clamp(1rem,1.8vw,1.6rem)] font-black tracking-[0.08em] text-white rounded-xl shadow-lg border-2 ${isSuccess ? 'bg-emerald-600 border-emerald-400' : 'bg-slate-700 border-slate-500 text-slate-300'}`}
+                                    className={`w-[88%] mt-3.5 py-2.5 text-center text-[clamp(1rem,1.8vw,1.6rem)] font-black tracking-[0.08em] text-white rounded-xl shadow-lg border-2 ${isSuccess ? 'bg-emerald-600 border-emerald-400' : 'bg-slate-700 border-slate-500 text-teal-200'}`}
                                 >
                                     {isSuccess ? '👑 守擂成功 · 直接晋级 👑' : '🛡️ 守擂失败 · 落入待定区 🛡️'}
                                 </motion.div>

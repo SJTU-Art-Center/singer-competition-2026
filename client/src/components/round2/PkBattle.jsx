@@ -40,7 +40,7 @@ export default function PkBattle({ gameState }) {
             if (role === 'master') {
                 // 擂主晋级 (情形A)
                 return {
-                    scale: 1.03,
+                    scale: 1.007,
                     y: -4,
                     boxShadow: "0 0 50px rgba(251, 191, 36, 0.58)",
                     borderColor: "rgba(251, 191, 36, 1)",
@@ -51,9 +51,9 @@ export default function PkBattle({ gameState }) {
                 // 挑战者淘汰 (情形A)
                 return {
                     scale: 0.74,
-                    opacity: 0.45,
-                    y: 42,
-                    filter: 'grayscale(100%) blur(4px)',
+                    opacity: 1,
+                    y: 0,
+                    filter: 'grayscale(0%)',
                     transition: { duration: 0.75 }
                 };
             }
@@ -63,28 +63,6 @@ export default function PkBattle({ gameState }) {
 
     return (
         <div className="flex flex-col items-center justify-end w-full h-full pt-1 pb-2 relative overflow-hidden">
-            {/* 晋级全屏光晕 */}
-            <AnimatePresence>
-                {isFinished && isMasterWin && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 0.13, scale: 1.55 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 1.5 }}
-                        className="absolute inset-0 bg-emerald-500 rounded-full blur-[80px] pointer-events-none -z-10 right-[-18%]"
-                    />
-                )}
-                {isFinished && isBothPending && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 0.16, scale: 1.45 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 1.2 }}
-                        className="absolute inset-0 bg-cyan-500 rounded-full blur-[75px] pointer-events-none -z-10"
-                    />
-                )}
-            </AnimatePresence>
-
             <h2 className="text-4xl font-black mt-4 mb-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-emerald-400 tracking-[0.35em] italic">1V1 BATTLE</h2>
 
             <AnimatePresence>
