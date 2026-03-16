@@ -18,19 +18,6 @@ export default function DemonKing({ gameState }) {
 
     return (
         <div className="flex flex-col items-center justify-start w-full h-full pt-[clamp(6px,1.2vh,14px)] pb-[clamp(8px,1.4vh,18px)] overflow-hidden">
-            {/* 晋级全屏光晕 */}
-            <AnimatePresence>
-                {isSuccess && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 0.16, scale: 1.45 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 1.5 }}
-                        className="absolute inset-0 bg-emerald-500 rounded-full blur-[80px] pointer-events-none -z-10"
-                    />
-                )}
-            </AnimatePresence>
-
             <motion.h2
                 initial={{ y: -50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
