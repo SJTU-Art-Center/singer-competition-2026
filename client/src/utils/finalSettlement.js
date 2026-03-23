@@ -51,14 +51,11 @@ export const deriveFinalSettlement = (gameState) => {
         matchByChallengerId.set(match.challengerId, match);
     });
 
-    const finishedMatches = pkMatches.filter((match) => match.status === 'finished');
-    const totalPkScore = finishedMatches.reduce((sum, match) => {
-        return sum + toNumber(match.masterScore) + toNumber(match.challengerScore);
-    }, 0);
-    const totalPkPlayers = finishedMatches.length * 2;
-    const computedPkAverage = totalPkPlayers > 0 ? totalPkScore / totalPkPlayers : 0;
-    const persistedAverage = toNumber(gameState?.demonKingAvgScore);
-    const demonKingThreshold = persistedAverage > 0 ? persistedAverage : computedPkAverage;
+    const round1ReferencePlayers = sortedByRound1.slice(2, 18);
+    const round1ReferenceTotal = round1ReferencePlayers.reduce((sum, player) => sum + toNumber(player.score), 0);
+    const demonKingThreshold = round1ReferencePlayers.length > 0
+        ? round1ReferenceTotal / round1ReferencePlayers.length
+        : 0;
 
     const masterRows = masters.map((master, index) => {
         const match = matchByMasterId.get(master.id);

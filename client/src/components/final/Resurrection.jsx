@@ -9,28 +9,30 @@ const BOARD_SAFE_LEFT = 6;
 const BOARD_SAFE_WIDTH = 88;
 
 const ROW_CENTER_Y = {
-    2: 26,
+    2: 25,
     4: 56,
     6: 82
 };
 
 const TITLE_CENTER_Y = {
     1: 10,
-    3: 40,
+    3: 55,
     5: 69
 };
 
 const MOTION = {
     layout: { duration: 0.66, ease: [0.4, 0, 0.2, 1] },
-    detail: { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
+    detail: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+    exitDown: { duration: 0.5, ease: [0.4, 0, 0.2, 1] }
 };
+
 
 const STAGE_OUT_DURATION_MS = 420;
 const STAGE_IN_SETTLE_MS = 460;
 
 const HERO_SIZE = { width: 186, height: 232 };
-const COMPACT_HEIGHT = 94;
-const COMPACT_DENSE_HEIGHT = 82;
+const COMPACT_HEIGHT = 106;
+const COMPACT_DENSE_HEIGHT = 92;
 
 const FALLBACK_AVATAR = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" fill="#1f2937"/><circle cx="60" cy="46" r="22" fill="#94a3b8"/><rect x="28" y="78" width="64" height="28" rx="14" fill="#94a3b8"/></svg>')}`;
 
@@ -45,6 +47,11 @@ const getSlotWidth = (colSpan, dense = false) => {
     return `calc(${slotPercent}% - ${gapOffset}px)`;
 };
 
+const HERO_STAGE1_SIZE = { width: getSlotWidth(5), height: '50%' };
+const HERO_STAGE2_SIZE = { width: getSlotWidth(5.5), height: '60%' };
+const STAGE5_CARD_SIZE = { width: getSlotWidth(2), height: '20%' };
+const STAGE6_CARD_SIZE = { width: getSlotWidth(3), height: 94 };
+const STAGE7_CARD_SIZE = { width: getSlotWidth(3), height: 102 };
 const COMPACT_SIZE = { width: getSlotWidth(2), height: COMPACT_HEIGHT };
 const COMPACT_DENSE_SIZE = { width: getSlotWidth(1, true), height: COMPACT_DENSE_HEIGHT };
 
@@ -107,6 +114,10 @@ const makePlacement = ({
     z,
     scale = 1,
     appearDelay = 0,
+    topPct = null,
+    safeLeft = BOARD_SAFE_LEFT,
+    safeWidth = BOARD_SAFE_WIDTH,
+    minReservedMetaHeight = null,
     emphasis = 1
 }) => {
     return {
@@ -124,6 +135,10 @@ const makePlacement = ({
         z,
         scale,
         appearDelay,
+        topPct,
+        safeLeft,
+        safeWidth,
+        minReservedMetaHeight,
         emphasis
     };
 };
@@ -133,27 +148,33 @@ const toCenterXPct = (col, colSpan) => {
     return BOARD_SAFE_LEFT + local * BOARD_SAFE_WIDTH;
 };
 
-const getTitleRows = ({ stage, advancedMasters, pendingMasters }) => {
-    if (stage === 1) return [{ key: 's1', text: '大魔王登场（暂不显示晋级）', row: 1 }];
-    if (stage === 2) return [{ key: 's2', text: '大魔王成绩与结果', row: 1 }];
+const buildEvenTopPercents = (rowCount, minTop = 22, maxTop = 84) => {
+    if (rowCount <= 1) return [(minTop + maxTop) / 2];
+    const step = (maxTop - minTop) / (rowCount - 1);
+    return Array.from({ length: rowCount }, (_, index) => minTop + index * step);
+};
+
+const getTitleRows = ({ stage, advancedMasters }) => {
+    if (stage === 1) return [{ key: 's1', text: '大魔王登场', row: 1 }];
+    if (stage === 2) return [{ key: 's2', text: '大魔王登场', row: 1 }];
     if (stage === 3) {
         return [
-            { key: 's3m', text: '擂主（8）', row: 1 },
-            { key: 's3c', text: '攻擂者（8）', row: 3 }
+            { key: 's3m', text: '擂主', row: 1 },
+            { key: 's3c', text: '攻擂者', row: 3 }
         ];
     }
 
     if (stage === 4) {
         if (advancedMasters.length > 0) {
             return [
-                { key: 's4a', text: '晋级擂主', row: 1 },
-                ...(pendingMasters.length > 0 ? [{ key: 's4p', text: '待定擂主', row: 3 }] : []),
-                { key: 's4c', text: '攻擂者', row: 5 }
+                { key: 's4a', text: '晋级擂主', row: 1, topPct: 2 },
+                { key: 's4p', text: '待定擂主', row: 3, topPct: 43 },
+                { key: 's4c', text: '攻擂者', row: 5, topPct: 74 }
             ];
         }
         return [
-            { key: 's4p-only', text: '待定擂主', row: 1 },
-            { key: 's4c-only', text: '攻擂者', row: 3 }
+            { key: 's4p-only', text: '待定擂主', row: 1, topPct: 43 },
+            { key: 's4c-only', text: '攻擂者', row: 3, topPct: 74 }
         ];
     }
 
@@ -163,15 +184,12 @@ const getTitleRows = ({ stage, advancedMasters, pendingMasters }) => {
 
     if (stage === 6) {
         return [
-            { key: 's6a', text: '待定区晋级', row: 1 },
-            { key: 's6n', text: '待定区未晋级', row: 3 }
+            { key: 's6a', text: '待定区晋级', row: 1, topPct: 5 },
+            { key: 's6n', text: '待定区未晋级', row: 3, topPct: 50 }
         ];
     }
 
-    return [
-        { key: 's7a', text: '最终晋级阵容', row: 1 },
-        { key: 's7n', text: '未晋级阵容', row: 3 }
-    ];
+    return [{ key: 's7a', text: '最终晋级阵容', row: 1, topPct: 8 }];
 };
 
 const placeCenteredRow = ({
@@ -183,7 +201,14 @@ const placeCenteredRow = ({
     showStatus,
     statusLabel,
     statusTone,
-    z
+    z,
+    width,
+    height,
+    topPct,
+    safeLeft,
+    safeWidth,
+    minReservedMetaHeight = null,
+    scale = 1
 }) => {
     if (!players || players.length === 0) return;
 
@@ -202,55 +227,163 @@ const placeCenteredRow = ({
             showStatus,
             statusLabel,
             statusTone,
-            width: density.width,
-            height: density.height,
+            width: width || density.width,
+            height: height || density.height,
             z,
+            topPct,
+            safeLeft,
+            safeWidth,
+            minReservedMetaHeight,
+            scale,
             appearDelay: index * 0.022
         }));
     });
+};
+
+const placeFixedFiveColGrid = ({
+    target,
+    players,
+    topPercents,
+    colSpan = 3,
+    tone,
+    showScore,
+    showStatus,
+    statusLabel,
+    statusTone,
+    z,
+    width,
+    height,
+    rowStart = 2,
+    minReservedMetaHeight = null,
+    scale = 1
+}) => {
+    if (!players || players.length === 0 || !topPercents || topPercents.length === 0) return;
+
+    const starts = buildCenteredStarts(5, colSpan, TOTAL_SUBCOLS);
+    const maxCount = topPercents.length * starts.length;
+    const visiblePlayers = players.slice(0, maxCount);
+
+    visiblePlayers.forEach((player, index) => {
+        const rowIndex = Math.floor(index / starts.length);
+        const colIndex = index % starts.length;
+        target.set(player.id, makePlacement({
+            row: rowStart + rowIndex,
+            col: starts[colIndex],
+            colSpan,
+            mode: 'compact',
+            tone,
+            showScore,
+            showStatus,
+            statusLabel,
+            statusTone,
+            width,
+            height,
+            z: Math.max(1, z - rowIndex),
+            topPct: topPercents[rowIndex],
+            minReservedMetaHeight,
+            scale,
+            appearDelay: index * 0.018
+        }));
+    });
+};
+
+const placeTwoCenteredRows = ({
+    target,
+    players,
+    topRowPct,
+    bottomRowPct,
+    tone,
+    showScore,
+    showStatus,
+    statusLabel,
+    statusTone,
+    z,
+    colSpan,
+    width,
+    height,
+    minReservedMetaHeight = null,
+    scale = 1
+}) => {
+    if (!players || players.length === 0) return;
+
+    const total = players.length;
+    const topCount = Math.ceil(total / 2);
+    const bottomCount = total - topCount;
+    const topPlayers = players.slice(0, topCount);
+    const bottomPlayers = players.slice(topCount);
+
+    const placeRow = (rowPlayers, topPct, rowZ, row) => {
+        if (rowPlayers.length === 0) return;
+        const starts = buildCenteredStarts(rowPlayers.length, colSpan, TOTAL_SUBCOLS);
+        rowPlayers.forEach((player, index) => {
+            target.set(player.id, makePlacement({
+                row,
+                col: starts[index],
+                colSpan,
+                mode: 'compact',
+                tone,
+                showScore,
+                showStatus,
+                statusLabel,
+                statusTone,
+                width,
+                height,
+                z: rowZ,
+                topPct,
+                minReservedMetaHeight,
+                scale,
+                appearDelay: index * 0.02
+            }));
+        });
+    };
+
+    placeRow(topPlayers, topRowPct, z, 4);
+    placeRow(bottomPlayers, bottomRowPct, Math.max(1, z - 1), 6);
 };
 
 const getStagePlacements = ({
     stage,
     demonKings,
     advancedDemonKings,
-    pendingDemonKings,
     masterRows,
     advancedMasters,
     pendingMasters,
     challengersByPair,
-    promotedPending,
-    nonPromotedPending,
-    stage7TopRow,
-    stage7BottomRow
+    pendingCandidates,
+    stage5PendingPool,
+    stage6PromotedPool,
+    stage6NonPromotedPool,
+    finalTop10,
+    stage6BottomPool
 }) => {
     const placements = new Map();
 
-    const setHero = (player, col) => {
+    const setHero = (player, col, heroSize = HERO_SIZE, heroColSpan = 4) => {
         if (!player) return;
         placements.set(player.id, makePlacement({
             row: 4,
             col,
-            colSpan: 4,
+            colSpan: heroColSpan,
             mode: 'hero',
             tone: 'demon',
             showScore: false,
             showStatus: false,
             statusLabel: '',
             statusTone: 'success',
-            width: HERO_SIZE.width,
-            height: HERO_SIZE.height,
+            width: heroSize.width,
+            height: heroSize.height,
             z: 8
         }));
     };
 
     if (stage === 1 || stage === 2) {
-        const heroCols = buildCenteredStarts(2, 4, TOTAL_SUBCOLS);
+        const heroCols = [3, 10];
         demonKings.forEach((player, index) => {
             const isAdvanced = advancedDemonKings.some((item) => item.id === player.id);
             const hasDkScore = player.scoreDK !== undefined && player.scoreDK !== null && player.scoreDK !== '';
 
-            setHero(player, heroCols[index] || 4);
+            const heroSize = stage === 1 ? HERO_STAGE1_SIZE : HERO_STAGE2_SIZE;
+            setHero(player, heroCols[index] || (stage === 1 ? 3 : 3), heroSize, 5);
             const existing = placements.get(player.id);
             placements.set(player.id, {
                 ...existing,
@@ -269,7 +402,7 @@ const getStagePlacements = ({
         masterRows.forEach((row, index) => {
             const start = strictStarts[index] || 1;
 
-            placements.set(row.master.id, makePlacement({
+                placements.set(row.master.id, makePlacement({
                 row: 2,
                 col: start,
                 colSpan: 2,
@@ -279,10 +412,10 @@ const getStagePlacements = ({
                 showStatus: false,
                 statusLabel: '',
                 statusTone: 'success',
-                width: COMPACT_SIZE.width,
-                height: COMPACT_SIZE.height,
-                z: 6
-            }));
+                    width: COMPACT_SIZE.width,
+                    height: '18%',
+                    z: 6
+                }));
 
             if (row.challenger) {
                 placements.set(row.challenger.id, makePlacement({
@@ -296,8 +429,9 @@ const getStagePlacements = ({
                     statusLabel: '',
                     statusTone: 'success',
                     width: COMPACT_SIZE.width,
-                    height: COMPACT_SIZE.height,
-                    z: 5
+                    height: '18%',
+                    z: 5,
+                    topPct: 70
                 }));
             }
         });
@@ -311,12 +445,17 @@ const getStagePlacements = ({
                 target: placements,
                 players: advancedMasters,
                 row: 2,
-                tone: 'master',
+                tone: 'success',
                 showScore: true,
                 showStatus: true,
                 statusLabel: '晋级',
                 statusTone: 'success',
-                z: 7
+                z: 7,
+                width: COMPACT_SIZE.width,
+                height: '25%',
+                topPct: 22,
+                minReservedMetaHeight: 44,
+                scale: 1.08
             });
 
             if (pendingMasters.length > 0) {
@@ -325,30 +464,32 @@ const getStagePlacements = ({
                     players: pendingMasters,
                     row: 4,
                     tone: 'pending',
-                    showScore: true,
-                    showStatus: true,
-                    statusLabel: '待定',
-                    statusTone: 'pending',
-                    z: 6
-                });
-            }
-
-            const strictStarts = Array.from({ length: 8 }, (_, index) => index * 2 + 1);
-            challengersByPair.forEach((player, index) => {
-                placements.set(player.id, makePlacement({
-                    row: 6,
-                    col: strictStarts[index] || 1,
-                    colSpan: 2,
-                    mode: 'compact',
-                    tone: 'challenger',
                     showScore: false,
                     showStatus: false,
                     statusLabel: '',
-                    statusTone: 'success',
+                    statusTone: 'pending',
+                    z: 6,
                     width: COMPACT_SIZE.width,
-                    height: COMPACT_SIZE.height,
-                    z: 4
-                }));
+                    height: '18%',
+                    topPct: 58,
+                    minReservedMetaHeight: 44
+                });
+            }
+
+            placeCenteredRow({
+                target: placements,
+                players: challengersByPair,
+                row: 6,
+                tone: 'challenger',
+                showScore: false,
+                showStatus: false,
+                statusLabel: '',
+                statusTone: 'pending',
+                z: 4,
+                width: COMPACT_SIZE.width,
+                height: '18%',
+                topPct: 89,
+                minReservedMetaHeight: 42
             });
 
             return placements;
@@ -359,79 +500,52 @@ const getStagePlacements = ({
             players: pendingMasters,
             row: 2,
             tone: 'pending',
-            showScore: true,
-            showStatus: true,
-            statusLabel: '待定',
+            showScore: false,
+            showStatus: false,
+            statusLabel: '',
             statusTone: 'pending',
-            z: 6
+            z: 6,
+            width: COMPACT_SIZE.width,
+            height: '18%',
+            topPct: 58,
+            minReservedMetaHeight: 44
         });
 
-        const strictStarts = Array.from({ length: 8 }, (_, index) => index * 2 + 1);
-        challengersByPair.forEach((player, index) => {
-            placements.set(player.id, makePlacement({
-                row: 4,
-                col: strictStarts[index] || 1,
-                colSpan: 2,
-                mode: 'compact',
-                tone: 'challenger',
-                showScore: false,
-                showStatus: false,
-                statusLabel: '',
-                statusTone: 'success',
-                width: COMPACT_SIZE.width,
-                height: COMPACT_SIZE.height,
-                z: 4
-            }));
+        placeCenteredRow({
+            target: placements,
+            players: challengersByPair,
+            row: 4,
+            tone: 'challenger',
+            showScore: false,
+            showStatus: false,
+            statusLabel: '',
+            statusTone: 'pending',
+            z: 4,
+            width: COMPACT_SIZE.width,
+            height: '18%',
+            topPct: 89,
+            minReservedMetaHeight: 42
         });
 
         return placements;
     }
 
     if (stage === 5) {
-        if (pendingDemonKings.length > 0) {
-            placeCenteredRow({
-                target: placements,
-                players: pendingDemonKings,
-                row: 2,
-                tone: 'pending',
-                showScore: true,
-                showStatus: true,
-                statusLabel: '待定',
-                statusTone: 'pending',
-                z: 7
-            });
-        }
-
-        const pendingMasterRow = pendingDemonKings.length > 0 ? 4 : 2;
-        placeCenteredRow({
+        placeTwoCenteredRows({
             target: placements,
-            players: pendingMasters,
-            row: pendingMasterRow,
+            players: stage5PendingPool,
+            topRowPct: 35,
+            bottomRowPct: 65,
             tone: 'pending',
-            showScore: true,
-            showStatus: true,
-            statusLabel: '待定',
+            showScore: false,
+            showStatus: false,
+            statusLabel: '',
             statusTone: 'pending',
-            z: 6
-        });
-
-        const challengerRow = pendingDemonKings.length > 0 ? 6 : 4;
-        const strictStarts = Array.from({ length: 8 }, (_, index) => index * 2 + 1);
-        challengersByPair.forEach((player, index) => {
-            placements.set(player.id, makePlacement({
-                row: challengerRow,
-                col: strictStarts[index] || 1,
-                colSpan: 2,
-                mode: 'compact',
-                tone: 'challenger',
-                showScore: false,
-                showStatus: false,
-                statusLabel: '',
-                statusTone: 'success',
-                width: COMPACT_SIZE.width,
-                height: COMPACT_SIZE.height,
-                z: 4
-            }));
+            z: 7,
+            colSpan: 2,
+            width: STAGE5_CARD_SIZE.width,
+            height: STAGE5_CARD_SIZE.height,
+            minReservedMetaHeight: null
         });
 
         return placements;
@@ -440,53 +554,59 @@ const getStagePlacements = ({
     if (stage === 6) {
         placeCenteredRow({
             target: placements,
-            players: promotedPending,
+            players: stage6PromotedPool,
             row: 2,
             tone: 'success',
             showScore: true,
             showStatus: true,
             statusLabel: '晋级',
             statusTone: 'success',
-            z: 7
+            z: 8,
+            width: '10%',
+            height: '25%',
+            topPct: 25,
+            safeLeft: 0,
+            safeWidth: 100,
+            minReservedMetaHeight: 42,
+            scale: 1.03
         });
 
         placeCenteredRow({
             target: placements,
-            players: nonPromotedPending,
+            players: stage6NonPromotedPool,
             row: 4,
             tone: 'pending',
             showScore: true,
             showStatus: true,
             statusLabel: '未晋级',
             statusTone: 'pending',
-            z: 6
+            z: 6,
+            width: '10%',
+            height: '25%',
+            topPct: 70,
+            safeLeft: 0,
+            safeWidth: 100,
+            minReservedMetaHeight: 42
         });
 
         return placements;
     }
 
-    placeCenteredRow({
+    placeFixedFiveColGrid({
         target: placements,
-        players: stage7TopRow,
-        row: 2,
+        players: finalTop10,
+        topPercents: [32, 71],
         tone: 'success',
         showScore: true,
         showStatus: true,
         statusLabel: '晋级',
         statusTone: 'success',
-        z: 8
-    });
-
-    placeCenteredRow({
-        target: placements,
-        players: stage7BottomRow,
-        row: 4,
-        tone: 'pending',
-        showScore: true,
-        showStatus: true,
-        statusLabel: '未晋级',
-        statusTone: 'pending',
-        z: 6
+        z: 8,
+        width: '14%',
+        height: '35%',
+        rowStart: 2,
+        minReservedMetaHeight: 42,
+        scale: 1.03
     });
 
     return placements;
@@ -612,24 +732,48 @@ export default function Resurrection({ gameState }) {
 
     const {
         sortedByRound1,
+        demonKingThreshold,
         demonKings,
         advancedDemonKings,
-        pendingDemonKings,
         masterRows,
         advancedMasters,
         pendingMasters,
+        pendingDemonKings,
         challengersByPair,
         pendingCandidates,
-        promotedPending,
-        nonPromotedPending,
-        stage7TopRow,
-        stage7BottomRow,
-        remainingSpots
+        finalTop10
     } = React.useMemo(() => deriveFinalSettlement(gameState), [gameState]);
 
     const playerById = React.useMemo(() => {
         return new Map(sortedByRound1.map((player) => [player.id, player]));
     }, [sortedByRound1]);
+
+    const stage5PendingPool = React.useMemo(() => {
+        const merged = [...pendingDemonKings, ...pendingMasters, ...challengersByPair];
+        const seen = new Set();
+        const deduped = [];
+        merged.forEach((player) => {
+            if (!player || seen.has(player.id)) return;
+            seen.add(player.id);
+            deduped.push(player);
+        });
+        return deduped;
+    }, [pendingDemonKings, pendingMasters, challengersByPair]);
+
+    const stage6BottomPool = React.useMemo(() => {
+        const topSet = new Set(finalTop10.map((player) => player.id));
+        return sortedByRound1.filter((player) => !topSet.has(player.id)).slice(0, 20);
+    }, [finalTop10, sortedByRound1]);
+
+    const stage6PromotedPool = React.useMemo(() => {
+        const topSet = new Set(finalTop10.map((player) => player.id));
+        return stage5PendingPool.filter((player) => topSet.has(player.id));
+    }, [stage5PendingPool, finalTop10]);
+
+    const stage6NonPromotedPool = React.useMemo(() => {
+        const promotedSet = new Set(stage6PromotedPool.map((player) => player.id));
+        return stage5PendingPool.filter((player) => !promotedSet.has(player.id));
+    }, [stage5PendingPool, stage6PromotedPool]);
 
     const [visualStage, setVisualStage] = React.useState(stageIndex);
     const [transitionState, setTransitionState] = React.useState({
@@ -670,11 +814,13 @@ export default function Resurrection({ gameState }) {
             ...demonKings.map((player) => player.id),
             ...masterRows.map((row) => row.master.id),
             ...challengersByPair.map((player) => player.id),
-            ...pendingCandidates.map((player) => player.id),
-            ...stage7TopRow.map((player) => player.id),
-            ...stage7BottomRow.map((player) => player.id)
+            ...stage5PendingPool.map((player) => player.id),
+            ...finalTop10.map((player) => player.id),
+            ...stage6BottomPool.map((player) => player.id),
+            ...stage6PromotedPool.map((player) => player.id),
+            ...stage6NonPromotedPool.map((player) => player.id),
         ]);
-    }, [demonKings, masterRows, challengersByPair, pendingCandidates, stage7TopRow, stage7BottomRow]);
+    }, [demonKings, masterRows, challengersByPair, stage5PendingPool, finalTop10, stage6BottomPool, stage6PromotedPool, stage6NonPromotedPool]);
 
     const basePlacementMap = React.useMemo(() => {
         return buildBasePlacementMap({ demonKings, masterRows, pendingCandidates });
@@ -685,30 +831,32 @@ export default function Resurrection({ gameState }) {
             stage: visualStage,
             demonKings,
             advancedDemonKings,
-            pendingDemonKings,
             masterRows,
             advancedMasters,
             pendingMasters,
             challengersByPair,
-            promotedPending,
-            nonPromotedPending,
-            stage7TopRow,
-            stage7BottomRow
+            pendingCandidates,
+            stage5PendingPool,
+            stage6PromotedPool,
+            stage6NonPromotedPool,
+            finalTop10,
+            stage6BottomPool
         });
         return normalizePlacements(raw);
     }, [
         visualStage,
         demonKings,
         advancedDemonKings,
-        pendingDemonKings,
         masterRows,
         advancedMasters,
         pendingMasters,
         challengersByPair,
-        promotedPending,
-        nonPromotedPending,
-        stage7TopRow,
-        stage7BottomRow
+        pendingCandidates,
+        stage5PendingPool,
+        stage6PromotedPool,
+        stage6NonPromotedPool,
+        finalTop10,
+        stage6BottomPool
     ]);
 
     const targetPlacementMap = React.useMemo(() => {
@@ -716,30 +864,32 @@ export default function Resurrection({ gameState }) {
             stage: stageIndex,
             demonKings,
             advancedDemonKings,
-            pendingDemonKings,
             masterRows,
             advancedMasters,
             pendingMasters,
             challengersByPair,
-            promotedPending,
-            nonPromotedPending,
-            stage7TopRow,
-            stage7BottomRow
+            pendingCandidates,
+            stage5PendingPool,
+            stage6PromotedPool,
+            stage6NonPromotedPool,
+            finalTop10,
+            stage6BottomPool
         });
         return normalizePlacements(raw);
     }, [
         stageIndex,
         demonKings,
         advancedDemonKings,
-        pendingDemonKings,
         masterRows,
         advancedMasters,
         pendingMasters,
         challengersByPair,
-        promotedPending,
-        nonPromotedPending,
-        stage7TopRow,
-        stage7BottomRow
+        pendingCandidates,
+        stage5PendingPool,
+        stage6PromotedPool,
+        stage6NonPromotedPool,
+        finalTop10,
+        stage6BottomPool
     ]);
 
     const lastPlacementRef = React.useRef(new Map());
@@ -776,12 +926,9 @@ export default function Resurrection({ gameState }) {
     const rowTitles = React.useMemo(() => {
         return getTitleRows({
             stage: visualStage,
-            advancedMasters,
-            pendingMasters
+            advancedMasters
         });
-    }, [visualStage, advancedMasters, pendingMasters]);
-
-    const showPendingPanel = visualStage === 6;
+    }, [visualStage, advancedMasters]);
 
     return (
         <div className="w-full h-full max-w-[1600px] mx-auto mt-4 px-4 md:px-6 pb-4 relative">
@@ -789,71 +936,32 @@ export default function Resurrection({ gameState }) {
                 <div className="absolute top-0 right-0 w-72 h-72 bg-teal-600/20 blur-[80px] rounded-full pointer-events-none"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-600/20 blur-[70px] rounded-full pointer-events-none"></div>
 
-                <h2 className="text-2xl md:text-3xl font-black text-center tracking-[0.14em] text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-emerald-400 mb-4">
-                    终极十强补位
-                </h2>
-
-                <div className={`relative h-[min(76vh,700px)] ${showPendingPanel ? 'grid grid-cols-1 lg:grid-cols-[1fr_2.4fr] gap-5 lg:gap-6' : ''}`}>
-                    <AnimatePresence initial={false}>
-                        {showPendingPanel && (
-                            <motion.aside
-                                key="pending-panel"
-                                initial={{ opacity: 0, x: -14 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -10 }}
-                                transition={MOTION.detail}
-                                className="h-full rounded-2xl border border-[var(--color-card-border)] bg-black/20 p-4 overflow-y-auto custom-scrollbar"
-                            >
-                                <h3 className="text-lg font-black tracking-[0.08em] text-slate-300 mb-3 border-l-4 border-teal-500 pl-3">待定区分数</h3>
-                                <div className="text-xs text-slate-500 mb-3 tracking-wide">补位名额：{remainingSpots} 人</div>
-
-                                <div className="space-y-2">
-                                    {pendingCandidates.map((player, index) => {
-                                        const promoted = promotedPending.some((item) => item.id === player.id);
-                                        return (
-                                            <motion.div
-                                                key={`pending-rank-${player.id}`}
-                                                initial={false}
-                                                animate={{ opacity: 1 }}
-                                                transition={MOTION.detail}
-                                                className={`flex items-center justify-between rounded-xl border px-3 py-2 ${promoted ? 'border-teal-500 bg-teal-900/30' : 'border-slate-700 bg-slate-900/40'}`}
-                                            >
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    <span className="w-5 text-center font-black text-slate-400">{index + 1}</span>
-                                                    <img src={getFullAvatarUrl(player.avatar)} alt={player.name} onError={handleAvatarError} className="w-7 h-7 rounded-full border border-white/20 object-cover" />
-                                                    <span className="font-bold text-slate-200 truncate text-xs">{player.name}</span>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="font-mono font-black text-slate-100 text-sm">{player.latestScore.toFixed(2)}</div>
-                                                    <div className={`text-[10px] font-bold tracking-wide ${promoted ? 'text-teal-300' : 'text-slate-400'}`}>
-                                                        {promoted ? '晋级' : '未晋级'}
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        );
-                                    })}
-                                </div>
-                            </motion.aside>
-                        )}
-                    </AnimatePresence>
+                <div className="relative h-[min(76vh,700px)]">
 
                     <section className="h-full relative">
                         <AnimatePresence mode="popLayout" initial={false}>
                             {rowTitles.map((title) => (
+                                (() => {
+                                    const isDemonTitle = title.text === '大魔王登场';
+                                    const disableTitleMotion = isDemonTitle && (visualStage === 1 || visualStage === 2);
+                                    const titleKey = disableTitleMotion ? 'demon-entrance-title' : `${visualStage}-${title.key}`;
+                                    return (
                                 <motion.div
-                                    key={`${visualStage}-${title.key}`}
-                                    initial={{ opacity: 0, y: 8 }}
+                                    key={titleKey}
+                                    initial={disableTitleMotion ? false : { opacity: 0, y: 8 }}
                                     animate={{
-                                        top: `${TITLE_CENTER_Y[title.row] || 9}%`,
-                                        opacity: transitionState.phase === 'out' ? 0.35 : 1,
+                                        top: `${title.topPct || TITLE_CENTER_Y[title.row] || 9}%`,
+                                        opacity: disableTitleMotion ? 1 : (transitionState.phase === 'out' ? 0.35 : 1),
                                         y: 0
                                     }}
-                                    exit={{ opacity: 0, y: -8 }}
-                                    transition={MOTION.detail}
-                                    className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-slate-300 text-[10px] md:text-xs font-black tracking-[0.1em] whitespace-nowrap"
+                                    exit={disableTitleMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
+                                    transition={disableTitleMotion ? { duration: 0 } : MOTION.detail}
+                                    className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-slate-200 text-[clamp(1rem,2.5vw,2.3rem)] font-black tracking-[0.14em] whitespace-nowrap"
                                 >
                                     {title.text}
                                 </motion.div>
+                                    );
+                                })()
                             ))}
                         </AnimatePresence>
 
@@ -866,18 +974,28 @@ export default function Resurrection({ gameState }) {
                             const fallbackPlacement = lastPlacementRef.current.get(id) || basePlacementMap.get(id) || parkingPlacement;
                             const placement = visiblePlacement || fallbackPlacement;
                             const isVisible = !!visiblePlacement;
-                            const xPct = toCenterXPct(placement.col, placement.colSpan);
-                            const yPct = placement.mode === 'hero' ? 50 : (ROW_CENTER_Y[placement.row] || 53);
+                            const xPct = toCenterXPct(
+                                placement.col,
+                                placement.colSpan,
+                                placement.safeLeft ?? BOARD_SAFE_LEFT,
+                                placement.safeWidth ?? BOARD_SAFE_WIDTH
+                            );
+                            const yPct = placement.topPct || (placement.mode === 'hero' ? 50 : (ROW_CENTER_Y[placement.row] || 53));
                             const scoreValue = getPlayerLatestScore(player, pkMatches);
 
                             let opacity = isVisible ? 1 : 0;
-                            let nodeScale = 1;
+                            let nodeScale = placement.scale || 1;
                             let nodeTransition = MOTION.layout;
+                            let exitY = 0;
+
 
                             if (transitionState.phase === 'out') {
                                 const inFrom = !!visiblePlacement;
                                 const inTo = !!targetPlacement;
-                                if (inFrom && !inTo) opacity = 0;
+                                if (inFrom && !inTo) {
+                                    opacity = 0;
+                                    exitY = 80;
+                                }
                                 if (!inFrom && inTo) opacity = 0;
                                 nodeTransition = {
                                     ...MOTION.layout,
@@ -886,6 +1004,7 @@ export default function Resurrection({ gameState }) {
                                     delay: 0
                                 };
                             }
+
 
                             if (transitionState.phase === 'in') {
                                 const inNow = !!visiblePlacement;
@@ -925,8 +1044,10 @@ export default function Resurrection({ gameState }) {
                                         top: `${yPct}%`,
                                         width: placement.width,
                                         height: placement.height,
-                                        opacity
+                                        opacity,
+                                        y: exitY
                                     }}
+
                                     transition={nodeTransition}
                                     style={{ zIndex: placement.z }}
                                     className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none will-change-[left,top,width,height,opacity]"
@@ -942,25 +1063,29 @@ export default function Resurrection({ gameState }) {
                                         scoreValue={scoreValue}
                                         cardScale={nodeScale}
                                         transitionState={transitionState}
+                                        currentStage={visualStage}
+                                        minReservedMetaHeight={placement.minReservedMetaHeight || null}
                                     />
                                 </motion.div>
                             );
                         })}
 
                         <AnimatePresence initial={false}>
-                            {visualStage >= 7 && (
+                            {visualStage === 2 && (
                                 <motion.div
-                                    key="stage7-badge"
+                                    key="stage2-average"
                                     initial={{ opacity: 0, y: 8 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -8 }}
+                                    animate={{ opacity: transitionState.phase === 'out' ? 0.4 : 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 8 }}
                                     transition={MOTION.detail}
-                                    className="absolute bottom-2 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full bg-teal-600 text-white font-black tracking-[0.1em] text-xs md:text-sm shadow-[0_4px_20px_rgba(20,184,166,0.4)]"
+                                    className="absolute bottom-7 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full border border-teal-400/35 bg-slate-900/55 text-teal-200 text-[clamp(1rem,2.5vw,2.3rem)] font-black tracking-[0.14em]"
                                 >
-                                    最终十强归位
+                                    16强均分：{Number(demonKingThreshold || 0).toFixed(2)}
                                 </motion.div>
                             )}
                         </AnimatePresence>
+
+
                     </section>
                 </div>
             </div>
@@ -978,45 +1103,92 @@ function PlayerCard({
     statusTone,
     scoreValue,
     cardScale,
-    transitionState
+    transitionState,
+    currentStage,
+    minReservedMetaHeight
 }) {
     const toneClass = toneToClass(tone);
     const statusClass = statusToClass(statusTone);
+
+    const noMeta = !showScore && !showStatus;
+    const isStage1HeroNoMeta = mode === 'hero' && currentStage === 1 && noMeta;
+    const isStage2Hero = mode === 'hero' && currentStage === 2;
+    const isStage4PromotedCompact = mode === 'compact' && currentStage === 4 && tone === 'success';
+    const isStage4MasterCompact = mode === 'compact' && currentStage === 4 && (tone === 'success' || tone === 'pending');
+    const isStage6PromotedCompact = mode === 'compact' && currentStage === 6 && tone === 'success';
+    const isStage6Compact = mode === 'compact' && currentStage === 6;
+    const isStage7Compact = mode === 'compact' && currentStage === 7;
+    const isStage6LikeCompact = isStage6Compact || isStage4MasterCompact;
+    const useLargeHeroIdentity = noMeta || isStage2Hero;
+    const isStage1To2Transition = mode === 'hero' && transitionState.from === 1 && transitionState.to === 2;
+    const isStage2OutcomeStable = isStage2Hero && transitionState.phase === 'idle';
+    const isPromotedOutcome = isStage2OutcomeStable && statusLabel === '晋级';
+    const isPendingOutcome = isStage2OutcomeStable && statusLabel === '待定';
+    const stage2OutcomeDelay = isStage2OutcomeStable ? 1 : 0;
 
     if (mode === 'hero') {
         return (
             <motion.div
                 initial={false}
                 animate={{
-                    scale: cardScale,
-                    opacity: transitionState.phase === 'out' ? 0.84 : 1
+                    scale: isPendingOutcome ? cardScale * 0.8 : (isPromotedOutcome ? cardScale * 1.02 : cardScale),
+                    opacity: transitionState.phase === 'out'
+                        ? (isStage1To2Transition ? 0.9 : 0.84)
+                        : (isPendingOutcome ? 0.92 : 1),
+                    y: isPendingOutcome ? 16 : (isPromotedOutcome ? -6 : 0),
+                    filter: isPendingOutcome ? 'grayscale(52%)' : 'grayscale(0%)',
+                    boxShadow: isPromotedOutcome ? '0 0 48px rgba(251, 191, 36, 0.52)' : 'none'
                 }}
-                transition={MOTION.detail}
-                className={`h-full rounded-3xl border ${toneClass} px-4 py-4 text-center flex flex-col items-center justify-start`}
+                transition={
+                    isStage1To2Transition
+                        ? { duration: 0.42, ease: [0.33, 1, 0.68, 1] }
+                        : (isStage2Hero ? { duration: 0.34, ease: [0.22, 1, 0.36, 1], delay: stage2OutcomeDelay } : MOTION.detail)
+                }
+                className={`h-full rounded-3xl border ${toneClass} px-4 py-4 text-center flex flex-col items-center ${noMeta ? (isStage1HeroNoMeta ? 'justify-center' : 'justify-start') : 'justify-between'}`}
             >
-                <div className="rounded-full p-[2px] bg-gradient-to-b from-white/35 to-white/10 mx-auto w-fit">
-                    <img src={getFullAvatarUrl(player.avatar)} alt={player.name} onError={handleAvatarError} className="w-16 h-16 rounded-full border border-white/20 object-cover" />
+                <div className={`rounded-full p-[2px] bg-gradient-to-b from-white/35 to-white/10 mx-auto w-fit ${isStage1HeroNoMeta ? 'mt-2' : ''}`}>
+                    <img src={getFullAvatarUrl(player.avatar)} alt={player.name} onError={handleAvatarError} className={`${useLargeHeroIdentity ? 'w-44 h-44' : 'w-30 h-30'} rounded-full border border-white/20 object-cover`} />
                 </div>
 
-                <div className="text-base font-black mt-2 text-slate-100 truncate w-full">{player.name}</div>
+                <div className={`${useLargeHeroIdentity ? 'text-[clamp(1.45rem,2.45vw,2rem)]' : 'text-[1.2rem]'} ${noMeta ? (isStage1HeroNoMeta ? 'mt-4' : 'mt-3') : (isStage2Hero ? 'mt-4' : 'mt-2')} font-black text-slate-100 truncate w-full`}>{player.name}</div>
 
-                <motion.div
-                    initial={false}
-                    animate={{ opacity: showScore ? 1 : 0, y: showScore ? 0 : 4 }}
-                    transition={{ ...MOTION.detail, duration: 0.34 }}
-                    className="mt-2 min-h-[28px] text-2xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-teal-300"
-                >
-                    {showScore ? Number(scoreValue || 0).toFixed(2) : ''}
-                </motion.div>
+                {!noMeta && (
+                    <motion.div
+                        initial={false}
+                        animate={{
+                            opacity: showScore ? 1 : 0,
+                            y: showScore ? 0 : 8,
+                            scale: showScore ? 1 : 0.9
+                        }}
+                        transition={
+                            isStage2Hero
+                                ? { duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: showScore ? 0.04 : 0 }
+                                : { ...MOTION.detail, duration: 0.34, ease: 'easeOut' }
+                        }
+                        className={`${isStage2Hero ? 'mt-3 min-h-[40px] text-4xl' : 'mt-2 min-h-[34px] text-[2rem]'} font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-teal-300`}
+                    >
+                        {showScore ? Number(scoreValue || 0).toFixed(2) : ''}
+                    </motion.div>
+                )}
 
-                <motion.div
-                    initial={false}
-                    animate={{ opacity: showStatus ? 1 : 0, y: showStatus ? 0 : 4 }}
-                    transition={{ ...MOTION.detail, duration: 0.32, delay: showStatus ? 0.08 : 0 }}
-                    className={`mt-1.5 text-[11px] font-black tracking-[0.06em] px-2.5 py-0.5 rounded-full border ${statusClass}`}
-                >
-                    {showStatus ? statusLabel : ''}
-                </motion.div>
+                {!noMeta && (
+                    <motion.div
+                        initial={false}
+                        animate={{
+                            opacity: showStatus ? 1 : 0,
+                            y: showStatus ? 0 : 10,
+                            scale: showStatus ? 1 : 0.72
+                        }}
+                        transition={
+                            isStage2Hero
+                                ? { duration: 0.3, ease: [0.22, 1, 0.36, 1], delay: showStatus ? 0.08 : 0 }
+                                : { ...MOTION.detail, duration: 0.32, delay: showStatus ? 0.08 : 0, ease: 'easeOut' }
+                        }
+                        className={`${isStage2Hero ? 'mt-2 text-[15px] px-4.5 py-1.5' : 'mt-1.5 text-[12px] px-3 py-1'} font-black tracking-[0.06em] rounded-full border ${statusClass}`}
+                    >
+                        {showStatus ? statusLabel : ''}
+                    </motion.div>
+                )}
             </motion.div>
         );
     }
@@ -1029,28 +1201,49 @@ function PlayerCard({
                 opacity: transitionState.phase === 'out' ? 0.88 : 1
             }}
             transition={MOTION.detail}
-            className={`h-full rounded-2xl border ${toneClass} px-2 py-2 text-center flex flex-col items-center`}
+            className={`h-full rounded-2xl border ${toneClass} ${isStage7Compact ? 'px-4 py-3' : (isStage6LikeCompact ? 'px-3 py-2.5' : 'px-2.5 py-2')} text-center flex flex-col items-center ${noMeta ? 'justify-center' : 'justify-between'}`}
         >
-            <img src={getFullAvatarUrl(player.avatar)} alt={player.name} onError={handleAvatarError} className="w-8 h-8 rounded-full border border-white/20 object-cover" />
-            <div className="mt-1 text-[10px] leading-tight font-black text-slate-100 truncate w-full">{player.name}</div>
+            <img src={getFullAvatarUrl(player.avatar)} alt={player.name} onError={handleAvatarError} className={`${isStage7Compact ? 'w-[6rem] h-[6rem]' : (noMeta ? 'w-[4.5rem] h-[4.5rem]' : (isStage6LikeCompact ? 'w-[3.75rem] h-[3.75rem]' : 'w-12 h-12'))} rounded-full border border-white/20 object-cover flex-shrink-0`} />
+            <div className={`${isStage7Compact ? 'mt-3 text-[20px]' : (noMeta ? 'mt-2.5 text-sm' : (isStage6LikeCompact ? 'mt-1.5 text-[11px]' : 'mt-1 text-[10px]'))} leading-tight font-black text-slate-100 truncate w-full min-h-[1.1rem]`}>{player.name}</div>
 
-            <motion.div
-                initial={false}
-                animate={{ opacity: showScore ? 1 : 0, y: showScore ? 0 : 4 }}
-                transition={{ ...MOTION.detail, duration: 0.3 }}
-                className="mt-0.5 text-[11px] font-mono font-black text-teal-200 min-h-[16px]"
-            >
-                {showScore ? Number(scoreValue || 0).toFixed(2) : ''}
-            </motion.div>
+            {!noMeta && (
+                <motion.div
+                    initial={false}
+                    animate={{
+                        opacity: showScore ? 1 : 0,
+                        y: showScore ? 0 : ((isStage4PromotedCompact || isStage6PromotedCompact) ? 16 : 4),
+                        scale: showScore ? 1 : ((isStage4PromotedCompact || isStage6PromotedCompact) ? 0.52 : 0.9)
+                    }}
+                    transition={
+                        (isStage4PromotedCompact || isStage6PromotedCompact)
+                            ? { duration: 0.44, ease: [0.22, 1, 0.36, 1], delay: showScore ? 0.08 : 0 }
+                            : { ...MOTION.detail, duration: 0.3 }
+                    }
+                    className={`${isStage7Compact ? 'mt-2 text-[18px]' : (isStage6LikeCompact ? 'mt-1 text-[13px]' : 'mt-0.5 text-xs')} font-mono font-black text-teal-200 ${minReservedMetaHeight ? '' : 'min-h-[16px]'}`}
+                    style={minReservedMetaHeight ? { minHeight: `${Math.max(14, minReservedMetaHeight - 20)}px` } : undefined}
+                >
+                    {showScore ? Number(scoreValue || 0).toFixed(2) : ''}
+                </motion.div>
+            )}
 
-            <motion.div
-                initial={false}
-                animate={{ opacity: showStatus ? 1 : 0, y: showStatus ? 0 : 4 }}
-                transition={{ ...MOTION.detail, duration: 0.28, delay: showStatus ? 0.05 : 0 }}
-                className={`mt-0.5 text-[9px] font-black tracking-[0.04em] px-1 py-0.5 rounded border ${statusClass}`}
-            >
-                {showStatus ? statusLabel : ''}
-            </motion.div>
+            {!noMeta && (
+                <motion.div
+                    initial={false}
+                    animate={{
+                        opacity: showStatus ? 1 : 0,
+                        y: showStatus ? 0 : ((isStage4PromotedCompact || isStage6PromotedCompact) ? 14 : 4),
+                        scale: showStatus ? 1 : ((isStage4PromotedCompact || isStage6PromotedCompact) ? 0.66 : 0.9)
+                    }}
+                    transition={
+                        (isStage4PromotedCompact || isStage6PromotedCompact)
+                            ? { duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: showStatus ? 0.18 : 0 }
+                            : { ...MOTION.detail, duration: 0.28, delay: showStatus ? 0.05 : 0 }
+                    }
+                    className={`${isStage7Compact ? 'mt-2 text-[13px] px-3 py-1' : (isStage6LikeCompact ? 'mt-1 text-[11px] px-2 py-0.5' : 'mt-0.5 text-[10px] px-1.5 py-0.5')} font-black tracking-[0.04em] rounded border ${statusClass}`}
+                >
+                    {showStatus ? statusLabel : ''}
+                </motion.div>
+            )}
         </motion.div>
     );
 }
@@ -1085,6 +1278,8 @@ PlayerCard.propTypes = {
     statusTone: PropTypes.oneOf(['pending', 'success']).isRequired,
     scoreValue: PropTypes.number.isRequired,
     cardScale: PropTypes.number.isRequired,
+    currentStage: PropTypes.number.isRequired,
+    minReservedMetaHeight: PropTypes.number,
     transitionState: PropTypes.shape({
         phase: PropTypes.oneOf(['idle', 'out', 'in']).isRequired,
         from: PropTypes.number.isRequired,

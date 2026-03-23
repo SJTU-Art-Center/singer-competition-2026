@@ -18,6 +18,9 @@ export default function AdminRound4({ gameState, updateState }) {
     const {
         demonKingThreshold,
         directAdvanced,
+        pendingDemonKings,
+        pendingMasters,
+        challengersByPair,
         pendingCandidates,
         remainingSpots,
         promotedPending,
@@ -30,6 +33,16 @@ export default function AdminRound4({ gameState, updateState }) {
     const screenFinalStageIndex = clampStage(gameState.screenFinalStageIndex ?? finalStageIndex);
 
     const projectedLabel = FINAL_STAGES.find((item) => item.value === screenFinalStageIndex)?.label || 'Stage 1';
+
+    const stagePendingTotal = React.useMemo(() => {
+        const merged = [...pendingDemonKings, ...pendingMasters, ...challengersByPair];
+        const seen = new Set();
+        merged.forEach((player) => {
+            if (!player) return;
+            seen.add(player.id);
+        });
+        return seen.size;
+    }, [pendingDemonKings, pendingMasters, challengersByPair]);
 
     const handleSetEditStage = (stage) => {
         updateState({ ...gameState, finalStageIndex: stage, resurrectionCalculated: true });
@@ -57,7 +70,7 @@ export default function AdminRound4({ gameState, updateState }) {
         },
         {
             title: '待定区总人数',
-            value: `${pendingCandidates.length} 人`,
+            value: `${stagePendingTotal} 人`,
             tone: 'text-teal-300'
         },
         {
