@@ -4,21 +4,28 @@ import PlayerIdentity from '../common/PlayerIdentity';
 import { getPlayerSingleLine } from '../../utils/playerIdentity';
 
 export default function AdminPickOpponent({ gameState, updateState }) {
+    const stageDefs = [
+        { value: 1, label: 'Stage 1 · 30人卡牌排名' },
+        { value: 2, label: 'Stage 2 · 19-30名淘汰动画' },
+        { value: 3, label: 'Stage 3 · 大魔王金色降临' },
+        { value: 4, label: 'Stage 4 · 对峙布局与自动填补' },
+        { value: 5, label: 'Stage 5 · 出牌式攻守配对' }
+    ];
+
     const sortedPlayers = [...gameState.players].sort((a, b) => {
         if (b.score !== a.score) return b.score - a.score;
         return a.id - b.id;
     });
     
-    // Masters 3-10, Challengers 11-18
-    const masters = sortedPlayers.slice(2, 10);
-    const challengers = sortedPlayers.slice(10, 18);
+    const masters = [...sortedPlayers.slice(2, 9), sortedPlayers[10]].filter(Boolean);
+    const challengers = [...sortedPlayers.slice(11, 18), sortedPlayers[9]].filter(Boolean);
 
     const pkMatches = gameState.pkMatches || [];
 
     const [selChallenger, setSelChallenger] = useState("");
     const [selMaster, setSelMaster] = useState("");
 
-    const handleCreatePairing = (challengerId, masterId) => {
+    const handleConfirmMatch = (challengerId, masterId) => {
         if (!challengerId || !masterId) return;
         const newMatches = [...pkMatches, {
             challengerId, masterId,
@@ -26,7 +33,14 @@ export default function AdminPickOpponent({ gameState, updateState }) {
             masterScore: 0,
             status: 'pending'
         }];
-        updateState({ ...gameState, pkMatches: newMatches, pickingChallengerId: null });
+        updateState({
+            ...gameState,
+            pkMatches: newMatches,
+            pickingChallengerId: null,
+            screenRound: 1.5,
+            screenTransitionStage: 5,
+            transitionStage: Math.max(5, Number(gameState.transitionStage ?? 1))
+        });
         setSelChallenger("");
         setSelMaster("");
     };
@@ -42,11 +56,6 @@ export default function AdminPickOpponent({ gameState, updateState }) {
         updateState({ ...gameState, pickingChallengerId: id });
     };
 
-    const handleClearPicking = () => {
-        setSelChallenger("");
-        updateState({ ...gameState, pickingChallengerId: null });
-    };
-
     const handleSeedData = () => {
         if (!window.confirm('⚠️ 一键填入测试配对？\n将自动把挑战者和守播区选手一一配对，覆盖现有配对列表。')) return;
         const newMatches = challengers.map((c, i) => ({
@@ -57,6 +66,12 @@ export default function AdminPickOpponent({ gameState, updateState }) {
             status: 'pending'
         }));
         updateState({ ...gameState, pkMatches: newMatches, pickingChallengerId: null });
+    };
+
+    const editStage = Number(gameState.transitionStage ?? 1);
+    const screenStage = Number(gameState.screenTransitionStage ?? editStage);
+    const handleProjectStage = (stage) => {
+        updateState({ ...gameState, screenRound: 1.5, transitionStage: stage, screenTransitionStage: stage });
     };
 
     return (
@@ -72,17 +87,43 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                     >
                         🧪 填入测试配对
                     </button>
+                </div>
+            </div>
+
+            <div className="mb-6 bg-slate-900 border border-slate-700 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                    <div className="text-sm font-bold text-slate-300">过渡动画阶段控制</div>
+                    <div className="text-xs font-bold text-slate-400">✏️ 编辑 Stage {editStage} / 📺 播放 Stage {screenStage}</div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
+                    {stageDefs.map((stage) => (
+                        <button
+                            key={stage.value}
+                            onClick={() => updateState({ ...gameState, transitionStage: stage.value })}
+                            className={`py-2 px-3 rounded-lg text-xs font-bold transition-all border ${editStage === stage.value ? 'bg-teal-600 text-white border-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.5)]' : 'bg-slate-800 text-slate-300 border-slate-600 hover:bg-slate-700'}`}
+                        >
+                            {stage.label}
+                        </button>
+                    ))}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
                     <button
-                        onClick={() => updateState({ ...gameState, screenRound: 1.5 })}
-                        className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-colors"
+                        onClick={() => handleProjectStage(Math.max(1, editStage - 1))}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-200"
                     >
-                        📺 投屏展示挑选环节
+                        ◀ 投屏上一步
                     </button>
                     <button
-                        onClick={handleClearPicking}
-                        className="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                        onClick={() => handleProjectStage(editStage)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white"
                     >
-                        清除大屏选中状态
+                        📺 投屏当前编辑Stage
+                    </button>
+                    <button
+                        onClick={() => handleProjectStage(Math.min(5, editStage + 1))}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-200"
+                    >
+                        投屏下一步 ▶
                     </button>
                 </div>
             </div>
@@ -137,7 +178,7 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                                 </select>
                             </div>
                             <button
-                                onClick={() => handleCreatePairing(parseInt(selChallenger), parseInt(selMaster))}
+                                onClick={() => handleConfirmMatch(parseInt(selChallenger), parseInt(selMaster))}
                                 disabled={!selChallenger || !selMaster}
                                 className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-lg shadow-lg"
                             >

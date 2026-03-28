@@ -20,48 +20,58 @@ export default function GroupIntro({ gameState }) {
 
     return (
         <div className="w-full h-full flex flex-col bg-slate-950 text-white overflow-hidden">
-            {/* Header */}
-            <div className="flex-shrink-0 pt-5 pb-3 text-center">
-                <h1 className="text-3xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-indigo-400 drop-shadow-lg">
-                    第一轮 · 分组介绍
-                </h1>
-                <p className="text-slate-500 text-xs mt-1 tracking-wider">共 6 组 · 每组 5 位选手</p>
-            </div>
-
-            {/* 6-group grid */}
-            <div className="flex-1 grid grid-cols-3 grid-rows-2 gap-3 px-4 pb-4 min-h-0">
+            <div className="flex-1 grid grid-cols-3 grid-rows-2 gap-3 px-4 pt-2 pb-4 min-h-0">
                 {groups.map(({ id, players, color }) => (
                     <div
                         key={id}
                         className={`flex flex-col rounded-2xl border ${color.border} bg-slate-900/60 backdrop-blur-sm overflow-hidden`}
                     >
-                        {/* Group label */}
                         <div className={`flex-shrink-0 flex items-center justify-center gap-2 py-1.5 ${color.label} text-sm font-black tracking-widest`}>
                             <span>第 {id} 组</span>
                         </div>
 
-                        {/* Players row */}
-                        <div className="flex-1 flex items-center justify-around px-2 py-2 gap-1 min-h-0">
-                            {players.map(p => (
-                                <div key={p.id} className="flex flex-col items-center gap-1 flex-1 min-w-0">
-                                    {/* Bubble avatar */}
-                                    <div className={`rounded-full p-[2px] bg-gradient-to-b ${color.ring} shadow-[0_4px_16px_rgba(0,0,0,0.5)] flex-shrink-0`}>
-                                        <img
-                                            src={getFullAvatarUrl(p.avatar)}
-                                            alt={p.name}
-                                            className="w-14 h-14 rounded-full border border-white/10 object-cover block"
+                        <div className="flex-1 px-2 py-2 min-h-0 flex flex-col gap-1.5">
+                            <div className="grid grid-cols-3 gap-1.5">
+                                {players.slice(0, 3).map(p => (
+                                    <div key={p.id} className="aspect-[3/4] rounded-[14px] border border-white/15 bg-gradient-to-br from-slate-800/70 to-slate-900/50 p-1 backdrop-blur-md shadow-[inset_0_1px_8px_rgba(255,255,255,0.1),0_4px_12px_rgba(2,6,23,0.3)] flex flex-col items-center justify-center text-center min-w-0 gap-1">
+                                        <div className={`rounded-xl p-[2px] bg-gradient-to-b ${color.ring} shadow-[0_4px_16px_rgba(0,0,0,0.5)] flex-shrink-0`}>
+                                            <img
+                                                src={getFullAvatarUrl(p.avatar)}
+                                                alt={p.name}
+                                                className="w-8 h-8 rounded-lg border border-white/10 object-cover block"
+                                            />
+                                        </div>
+                                        <PlayerIdentity
+                                            player={p}
+                                            compact
+                                            className="max-w-full"
+                                            numberClassName="hidden"
+                                            nameClassName={`text-[10px] ${color.title} text-center`}
                                         />
                                     </div>
-                                    {/* Name */}
-                                    <PlayerIdentity
-                                        player={p}
-                                        compact
-                                        className="max-w-full"
-                                        numberClassName="text-[9px] text-slate-400"
-                                        nameClassName={`text-xs ${color.title}`}
-                                    />
-                                </div>
-                            ))}
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-1.5 w-[66.7%] mx-auto">
+                                {players.slice(3, 5).map(p => (
+                                    <div key={p.id} className="aspect-[3/4] rounded-[14px] border border-white/15 bg-gradient-to-br from-slate-800/70 to-slate-900/50 p-1 backdrop-blur-md shadow-[inset_0_1px_8px_rgba(255,255,255,0.1),0_4px_12px_rgba(2,6,23,0.3)] flex flex-col items-center justify-center text-center min-w-0 gap-1">
+                                        <div className={`rounded-xl p-[2px] bg-gradient-to-b ${color.ring} shadow-[0_4px_16px_rgba(0,0,0,0.5)] flex-shrink-0`}>
+                                            <img
+                                                src={getFullAvatarUrl(p.avatar)}
+                                                alt={p.name}
+                                                className="w-8 h-8 rounded-lg border border-white/10 object-cover block"
+                                            />
+                                        </div>
+                                        <PlayerIdentity
+                                            player={p}
+                                            compact
+                                            className="max-w-full"
+                                            numberClassName="hidden"
+                                            nameClassName={`text-[10px] ${color.title} text-center`}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 ))}
