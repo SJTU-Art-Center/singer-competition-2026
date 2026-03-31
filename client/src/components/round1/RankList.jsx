@@ -3,6 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getFullAvatarUrl } from '../../utils/avatar';
 import PlayerIdentity from '../common/PlayerIdentity';
 
+const GROUP_COLORS = [
+    { ring: 'from-emerald-300/35 to-cyan-800/15', title: 'text-white', card: 'from-emerald-500/34 to-emerald-900/20 border-emerald-300/50' },
+    { ring: 'from-emerald-300/35 to-cyan-800/15', title: 'text-slate-100', card: 'from-emerald-500/34 to-emerald-900/20 border-emerald-300/50' },
+    { ring: 'from-emerald-300/35 to-cyan-800/15', title: 'text-slate-100', card: 'from-emerald-500/34 to-emerald-900/20 border-emerald-300/50' },
+    { ring: 'from-cyan-300/35 to-emerald-800/15', title: 'text-slate-100', card: 'from-cyan-500/36 to-slate-900/24 border-cyan-300/55' },
+    { ring: 'from-cyan-300/35 to-emerald-800/15', title: 'text-slate-100', card: 'from-cyan-500/36 to-slate-900/24 border-cyan-300/55' },
+    { ring: 'from-cyan-300/35 to-emerald-800/15', title: 'text-slate-100', card: 'from-cyan-500/36 to-slate-900/24 border-cyan-300/55' },
+];
+
 export default function RankList({ gameState }) {
     const { players, currentGroup, round1Mode } = gameState;
 
@@ -17,32 +26,34 @@ export default function RankList({ gameState }) {
             return a.id - b.id;
         });
 
+    const groupColor = GROUP_COLORS[(currentGroup - 1 + GROUP_COLORS.length) % GROUP_COLORS.length];
+
     const getRankZoneStyle = (index, isGlobal) => {
-        if (!isGlobal) return "bg-[var(--rank-challenger-bg)] border-[var(--rank-challenger-border)] text-[var(--rank-challenger-text)] shadow-lg border";
+        if (!isGlobal) return "bg-gradient-to-br from-emerald-500/24 to-cyan-900/10 border-emerald-300/35 text-teal-50 shadow-[inset_0_1px_8px_rgba(255,255,255,0.12),0_4px_10px_rgba(2,6,23,0.22)] border backdrop-blur-md";
         if (index < 2) return "bg-[var(--rank-king-bg)] border-[var(--rank-king-border)] text-[var(--rank-king-text)] shadow-[var(--rank-king-shadow)] border-2";
         if (index < 10) return "bg-[var(--rank-master-bg)] border-[var(--rank-master-border)] text-[var(--rank-master-text)] shadow-[var(--rank-master-shadow)] border";
         if (index < 18) return "bg-[var(--rank-challenger-bg)] border-[var(--rank-challenger-border)] text-[var(--rank-challenger-text)] shadow-[var(--rank-challenger-shadow)] border";
         return "bg-[var(--rank-eliminated-bg)] border-[var(--rank-eliminated-border)] text-[var(--rank-eliminated-text)] opacity-70 border";
     };
 
-    const Card = ({ player, index, isGlobal, large = false }) => (
+    const Card = ({ player, index, isGlobal, large = false, compactGroup = false }) => (
         <motion.div
             key={player.id}
             layout
             initial={{ opacity: 0, y: 20, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ type: 'spring', stiffness: 200, damping: 20, delay: Math.min(index * 0.02, 0.25) }}
-            className={`relative aspect-[3/4] rounded-[16px] border backdrop-blur-md overflow-hidden transition-all duration-300 shadow-[inset_0_1px_8px_rgba(255,255,255,0.12),0_6px_16px_rgba(2,6,23,0.3)] ${getRankZoneStyle(index, isGlobal)}`}
+            className={`relative ${compactGroup ? 'aspect-[3/4] scale-[0.64] origin-center' : 'aspect-[3/4]'} rounded-[16px] border backdrop-blur-md overflow-hidden transition-all duration-300 shadow-[inset_0_1px_8px_rgba(255,255,255,0.12),0_6px_16px_rgba(2,6,23,0.3)] ${getRankZoneStyle(index, isGlobal)}`}
         >
-            <div className="absolute top-1.5 left-1.5 bg-black/50 text-[10px] px-2 py-0.5 rounded-md font-black text-teal-200 tracking-wide z-10">
+            <div className={`absolute top-1.5 left-1.5 bg-black/50 ${compactGroup ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2 py-0.5'} rounded-md font-black text-teal-200 tracking-wide z-10`}>
                 {isGlobal ? `NO.${index + 1}` : `G${currentGroup}-${index + 1}`}
             </div>
 
-            <div className="h-full flex flex-col items-center justify-between text-center p-2.5">
+            <div className={`h-full flex flex-col items-center justify-between text-center ${compactGroup ? 'p-2 py-1 gap-1' : 'p-2.5'}`}>
                 <img
                     src={getFullAvatarUrl(player.avatar)}
                     alt={player.name}
-                    className={`${large ? 'w-16 h-16' : 'w-12 h-12'} rounded-xl border border-white/25 object-cover block`}
+                    className={`${compactGroup ? 'w-11 h-11' : large ? 'w-16 h-16' : 'w-12 h-12'} rounded-xl border border-white/25 object-cover block`}
                 />
 
                 <PlayerIdentity
@@ -50,7 +61,7 @@ export default function RankList({ gameState }) {
                     compact
                     className="w-full"
                     numberClassName="text-[10px] text-slate-300"
-                    nameClassName={`${large ? 'text-[15px]' : 'text-[12px]'} font-black text-white truncate text-center`}
+                    nameClassName={`${compactGroup ? 'text-[12px]' : large ? 'text-[15px]' : 'text-[12px]'} font-black text-white truncate text-center`}
                 />
 
                 {isGlobal && (
@@ -58,7 +69,7 @@ export default function RankList({ gameState }) {
                         {index < 2 ? '大魔王区' : index < 10 ? '擂主区' : index < 18 ? '挑战者区' : '淘汰区'}
                     </div>
                 )}
-                <div className={`${large ? 'text-[34px]' : 'text-[18px]'} font-black font-mono text-teal-100 leading-none`}>
+                <div className={`${compactGroup ? 'text-[15px]' : large ? 'text-[34px]' : 'text-[18px]'} font-black font-mono text-teal-100 leading-none`}>
                     <ScoreCounter value={player.score} />
                 </div>
             </div>
@@ -76,12 +87,65 @@ export default function RankList({ gameState }) {
             )}
 
             {isGroupMode ? (
-                <div className="flex-1 min-h-0 grid grid-cols-5 gap-2.5 items-center">
-                    <AnimatePresence mode="popLayout">
-                        {displayPlayers.map((player, index) => (
-                            <Card key={player.id} player={player} index={index} isGlobal={false} large />
-                        ))}
-                    </AnimatePresence>
+                <div className="flex-1 min-h-0 flex items-center justify-center">
+                    <div className="w-full max-w-[620px] flex flex-col gap-px">
+                        <div className="grid grid-cols-3 gap-0 mt-2">
+                            <AnimatePresence mode="popLayout">
+                                {displayPlayers.slice(0, 3).map((player, index) => (
+                                    <motion.div
+                                        key={player.id}
+                                        layout
+                                        initial={{ opacity: 0, y: 20, scale: 0.94 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        transition={{ type: 'spring', stiffness: 200, damping: 20, delay: Math.min(index * 0.02, 0.25) }}
+                                        className={`aspect-[3/4] scale-[0.76] origin-center rounded-[16px] border p-1 bg-gradient-to-br ${groupColor.card} backdrop-blur-md shadow-[inset_0_1px_8px_rgba(255,255,255,0.12),0_4px_10px_rgba(2,6,23,0.25)] flex flex-col items-center justify-between text-center min-w-0 gap-1`}
+                                    >
+                                        <img
+                                            src={getFullAvatarUrl(player.avatar)}
+                                            alt={player.name}
+                                                className="w-24 h-24 mt-6 rounded-2xl border border-white/15 object-cover block"
+                                            />
+                                        <PlayerIdentity
+                                            player={player}
+                                            compact
+                                            className="max-w-full -mt-1"
+                                            numberClassName="hidden"
+                                            nameClassName={`text-[22px] ${groupColor.title} text-center`}
+                                        />
+                                        <div className="text-[40px] font-black text-teal-100 leading-none -mt-4 mb-3">{Number(player.score || 0).toFixed(2)}</div>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                        </div>
+                        <div className="grid grid-cols-2 gap-0 w-[72%] mx-auto -translate-y-6">
+                            <AnimatePresence mode="popLayout">
+                                {displayPlayers.slice(3, 5).map((player, index) => (
+                                    <motion.div
+                                        key={player.id}
+                                        layout
+                                        initial={{ opacity: 0, y: 20, scale: 0.94 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        transition={{ type: 'spring', stiffness: 200, damping: 20, delay: Math.min((index + 3) * 0.02, 0.25) }}
+                                        className={`aspect-[3/4] scale-[0.76] origin-top rounded-[16px] border p-1 bg-gradient-to-br ${groupColor.card} backdrop-blur-md shadow-[inset_0_1px_8px_rgba(255,255,255,0.12),0_4px_10px_rgba(2,6,23,0.25)] flex flex-col items-center justify-between text-center min-w-0 gap-1`}
+                                    >
+                                        <img
+                                            src={getFullAvatarUrl(player.avatar)}
+                                            alt={player.name}
+                                            className="w-24 h-24 mt-6 rounded-2xl border border-white/15 object-cover block"
+                                        />
+                                        <PlayerIdentity
+                                            player={player}
+                                            compact
+                                            className="max-w-full -mt-1"
+                                            numberClassName="hidden"
+                                            nameClassName={`text-[22px] ${groupColor.title} text-center`}
+                                        />
+                                        <div className="text-[40px] font-black text-teal-100 leading-none -mt-4 mb-3">{Number(player.score || 0).toFixed(2)}</div>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                        </div>
+                    </div>
                 </div>
             ) : (
                 <div className="flex-1 min-h-0 grid grid-cols-6 grid-rows-5 gap-2">

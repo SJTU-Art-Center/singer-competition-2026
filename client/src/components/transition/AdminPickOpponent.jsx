@@ -8,8 +8,7 @@ export default function AdminPickOpponent({ gameState, updateState }) {
         { value: 1, label: 'Stage 1 · 30人卡牌排名' },
         { value: 2, label: 'Stage 2 · 19-30名淘汰动画' },
         { value: 3, label: 'Stage 3 · 大魔王金色降临' },
-        { value: 4, label: 'Stage 4 · 对峙布局与自动填补' },
-        { value: 5, label: 'Stage 5 · 出牌式攻守配对' }
+        { value: 4, label: 'Stage 4 · 擂主固定+攻擂入槽' }
     ];
 
     const sortedPlayers = [...gameState.players].sort((a, b) => {
@@ -38,8 +37,8 @@ export default function AdminPickOpponent({ gameState, updateState }) {
             pkMatches: newMatches,
             pickingChallengerId: null,
             screenRound: 1.5,
-            screenTransitionStage: 5,
-            transitionStage: Math.max(5, Number(gameState.transitionStage ?? 1))
+            screenTransitionStage: 4,
+            transitionStage: Math.max(4, Number(gameState.transitionStage ?? 1))
         });
         setSelChallenger("");
         setSelMaster("");
@@ -120,7 +119,7 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                         📺 投屏当前编辑Stage
                     </button>
                     <button
-                        onClick={() => handleProjectStage(Math.min(5, editStage + 1))}
+                        onClick={() => handleProjectStage(Math.min(4, editStage + 1))}
                         className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-200"
                     >
                         投屏下一步 ▶
