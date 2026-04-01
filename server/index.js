@@ -56,6 +56,8 @@ function initData() {
     const defaultData = {
       adminRound: 0, // 后台当前比赛轮次 (0: 赛前设置, 1: 30进18, 1.5: 挑选对手, 2: 16人PK, 3: 大魔王返场, 4: 终极补位)
       screenRound: 0, // 大屏当前比赛轮次
+      screenDisplayMode: 'live',
+      theme: 'theme-background',
       currentGroup: 1, // 第一轮当前展示/打分的组别
       pickingChallengerId: null, // 正在挑选对手的挑战者ID
       transitionStage: 1,

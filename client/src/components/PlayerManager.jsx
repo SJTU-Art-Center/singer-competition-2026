@@ -131,6 +131,8 @@ export default function PlayerManager({ gameState, updateState }) {
             const defaultData = {
                 adminRound: 0,
                 screenRound: 0,
+                screenDisplayMode: 'live',
+                theme: 'theme-background',
                 currentGroup: 1,
                 pickingChallengerId: null,
                 transitionStage: 1,
