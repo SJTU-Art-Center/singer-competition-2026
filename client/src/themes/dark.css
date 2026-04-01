@@ -1,5 +1,5 @@
-/* Theme: Dark (default — emerald/teal sci-fi) */
-:root {
+/* Theme: Dark — emerald/teal sci-fi */
+.theme-dark {
   --color-bg-base: #022c22; /* emerald-950 */
   --color-bg-screen: #064e3b; /* emerald-900 */
   --color-text-main: #f8fafc;
