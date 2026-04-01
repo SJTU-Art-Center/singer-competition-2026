@@ -133,6 +133,8 @@ export default function PlayerManager({ gameState, updateState }) {
                 screenRound: 0,
                 currentGroup: 1,
                 pickingChallengerId: null,
+                transitionStage: 1,
+                screenTransitionStage: 1,
                 players: gameState.players.map(p => ({
                     ...p,
                     score: 0,

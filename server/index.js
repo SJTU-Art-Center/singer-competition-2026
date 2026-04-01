@@ -58,6 +58,8 @@ function initData() {
       screenRound: 0, // 大屏当前比赛轮次
       currentGroup: 1, // 第一轮当前展示/打分的组别
       pickingChallengerId: null, // 正在挑选对手的挑战者ID
+      transitionStage: 1,
+      screenTransitionStage: 1,
       players: Array.from({ length: 30 }).map((_, i) => ({
         id: i + 1,
         number: String(i + 1).padStart(3, '0'),
