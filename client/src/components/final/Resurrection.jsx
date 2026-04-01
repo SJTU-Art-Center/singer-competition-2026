@@ -10,15 +10,15 @@ const BOARD_SAFE_LEFT = 6;
 const BOARD_SAFE_WIDTH = 88;
 
 const ROW_CENTER_Y = {
-    2: 25,
-    4: 56,
-    6: 82
+    2: 20,
+    4: 49,
+    6: 74
 };
 
 const TITLE_CENTER_Y = {
-    1: 10,
-    3: 55,
-    5: 69
+    1: 7,
+    3: 46,
+    5: 60
 };
 
 const MOTION = {
@@ -31,9 +31,9 @@ const MOTION = {
 const STAGE_OUT_DURATION_MS = 420;
 const STAGE_IN_SETTLE_MS = 460;
 
-const HERO_SIZE = { width: 186, height: 232 };
-const COMPACT_HEIGHT = 106;
-const COMPACT_DENSE_HEIGHT = 92;
+const HERO_SIZE = { width: 164, height: 204 };
+const COMPACT_HEIGHT = 90;
+const COMPACT_DENSE_HEIGHT = 78;
 
 const FALLBACK_AVATAR = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" fill="#1f2937"/><circle cx="60" cy="46" r="22" fill="#94a3b8"/><rect x="28" y="78" width="64" height="28" rx="14" fill="#94a3b8"/></svg>')}`;
 
@@ -48,11 +48,11 @@ const getSlotWidth = (colSpan, dense = false) => {
     return `calc(${slotPercent}% - ${gapOffset}px)`;
 };
 
-const HERO_STAGE1_SIZE = { width: getSlotWidth(5), height: '50%' };
-const HERO_STAGE2_SIZE = { width: getSlotWidth(5.5), height: '60%' };
-const STAGE5_CARD_SIZE = { width: getSlotWidth(2), height: '22%' };
-const STAGE6_CARD_SIZE = { width: getSlotWidth(3), height: 120 };
-const STAGE7_CARD_SIZE = { width: getSlotWidth(3), height: 118 };
+const HERO_STAGE1_SIZE = { width: getSlotWidth(4.5), height: '44%' };
+const HERO_STAGE2_SIZE = { width: getSlotWidth(5), height: '52%' };
+const STAGE5_CARD_SIZE = { width: getSlotWidth(2), height: '18%' };
+const STAGE6_CARD_SIZE = { width: getSlotWidth(3), height: 102 };
+const STAGE7_CARD_SIZE = { width: getSlotWidth(3), height: 102 };
 const COMPACT_SIZE = { width: getSlotWidth(2), height: COMPACT_HEIGHT };
 const COMPACT_DENSE_SIZE = { width: getSlotWidth(1, true), height: COMPACT_DENSE_HEIGHT };
 
@@ -414,7 +414,7 @@ const getStagePlacements = ({
                 statusLabel: '',
                 statusTone: 'success',
                     width: COMPACT_SIZE.width,
-                    height: '22%',
+                    height: '18%',
                     z: 6
                 }));
 
@@ -430,9 +430,9 @@ const getStagePlacements = ({
                     statusLabel: '',
                     statusTone: 'success',
                     width: COMPACT_SIZE.width,
-                    height: '22%',
+                    height: '18%',
                     z: 5,
-                    topPct: 70
+                    topPct: 61
                 }));
             }
         });
@@ -453,8 +453,8 @@ const getStagePlacements = ({
                 statusTone: 'success',
                 z: 7,
                 width: COMPACT_SIZE.width,
-                height: '26%',
-                topPct: 22,
+                height: '22%',
+                topPct: 18,
                 minReservedMetaHeight: 44,
                 scale: 1.08
             });
@@ -471,8 +471,8 @@ const getStagePlacements = ({
                     statusTone: 'pending',
                     z: 6,
                     width: COMPACT_SIZE.width,
-                    height: '22%',
-                    topPct: 58,
+                    height: '18%',
+                    topPct: 48,
                     minReservedMetaHeight: 44
                 });
             }
@@ -488,8 +488,8 @@ const getStagePlacements = ({
                 statusTone: 'pending',
                 z: 4,
                 width: COMPACT_SIZE.width,
-                height: '22%',
-                topPct: 89,
+                height: '18%',
+                topPct: 74,
                 minReservedMetaHeight: 42
             });
 
@@ -507,8 +507,8 @@ const getStagePlacements = ({
             statusTone: 'pending',
             z: 6,
             width: COMPACT_SIZE.width,
-            height: '22%',
-            topPct: 58,
+            height: '18%',
+            topPct: 48,
             minReservedMetaHeight: 44
         });
 
@@ -523,8 +523,8 @@ const getStagePlacements = ({
             statusTone: 'pending',
             z: 4,
             width: COMPACT_SIZE.width,
-            height: '22%',
-            topPct: 89,
+            height: '18%',
+            topPct: 74,
             minReservedMetaHeight: 42
         });
 
@@ -535,8 +535,8 @@ const getStagePlacements = ({
         placeTwoCenteredRows({
             target: placements,
             players: stage5PendingPool,
-            topRowPct: 35,
-            bottomRowPct: 65,
+            topRowPct: 29,
+            bottomRowPct: 56,
             tone: 'pending',
             showScore: false,
             showStatus: false,
@@ -564,8 +564,8 @@ const getStagePlacements = ({
             statusTone: 'success',
             z: 8,
             width: COMPACT_SIZE.width,
-            height: '26%',
-            topPct: 25,
+            height: '22%',
+            topPct: 20,
             safeLeft: 0,
             safeWidth: 100,
             minReservedMetaHeight: 44,
@@ -583,8 +583,8 @@ const getStagePlacements = ({
             statusTone: 'pending',
             z: 6,
             width: COMPACT_SIZE.width,
-            height: '26%',
-            topPct: 70,
+            height: '22%',
+            topPct: 56,
             safeLeft: 0,
             safeWidth: 100,
             minReservedMetaHeight: 44,
@@ -597,15 +597,15 @@ const getStagePlacements = ({
     placeFixedFiveColGrid({
         target: placements,
         players: finalTop10,
-        topPercents: [33, 74],
+        topPercents: [26, 58],
         tone: 'success',
         showScore: true,
         showStatus: true,
         statusLabel: '晋级',
         statusTone: 'success',
         z: 8,
-        width: '14%',
-        height: '36%',
+        width: '13%',
+        height: '28%',
         rowStart: 2,
         minReservedMetaHeight: 42,
         scale: 1.03
@@ -933,12 +933,12 @@ export default function Resurrection({ gameState }) {
     }, [visualStage, advancedMasters]);
 
     return (
-        <div className="w-full h-full max-w-[1600px] mx-auto mt-4 px-4 md:px-6 pb-4 relative">
-            <div className="h-full rounded-3xl border border-[var(--color-card-border)] bg-[var(--color-card-bg)] backdrop-blur-md p-5 md:p-8 shadow-2xl relative overflow-hidden">
+        <div className="w-full h-full max-w-[1700px] mx-auto mt-2 px-4 md:px-5 pb-3 relative">
+            <div className="h-full rounded-3xl border border-[var(--color-card-border)] bg-[var(--color-card-bg)] backdrop-blur-md p-4 md:p-6 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-72 h-72 bg-teal-600/20 blur-[80px] rounded-full pointer-events-none"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-600/20 blur-[70px] rounded-full pointer-events-none"></div>
 
-                <div className="relative h-[min(76vh,700px)]">
+                <div className="relative h-[min(60vh,480px)]">
 
                     <section className="h-full relative">
                         <AnimatePresence mode="popLayout" initial={false}>
@@ -958,7 +958,7 @@ export default function Resurrection({ gameState }) {
                                     }}
                                     exit={disableTitleMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
                                     transition={disableTitleMotion ? { duration: 0 } : MOTION.detail}
-                                    className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-slate-200 text-[clamp(1rem,2.5vw,2.3rem)] font-black tracking-[0.14em] whitespace-nowrap"
+                                    className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-slate-200 text-[clamp(0.92rem,2.1vw,1.8rem)] font-black tracking-[0.14em] whitespace-nowrap"
                                 >
                                     {title.text}
                                 </motion.div>
@@ -1080,7 +1080,7 @@ export default function Resurrection({ gameState }) {
                                     animate={{ opacity: transitionState.phase === 'out' ? 0.4 : 1, y: 0 }}
                                     exit={{ opacity: 0, y: 8 }}
                                     transition={MOTION.detail}
-                                    className="absolute bottom-7 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full border border-teal-400/35 bg-slate-900/55 text-teal-200 text-[clamp(1rem,2.5vw,2.3rem)] font-black tracking-[0.14em]"
+                                    className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full border border-teal-400/35 bg-slate-900/55 text-teal-200 text-[clamp(0.92rem,2vw,1.7rem)] font-black tracking-[0.14em]"
                                 >
                                     16强均分：{Number(demonKingThreshold || 0).toFixed(2)}
                                 </motion.div>
@@ -1151,8 +1151,8 @@ function PlayerCard({
                 }
                 className={`h-full rounded-3xl border ${toneClass} px-4 py-4 text-center flex flex-col items-center ${noMeta ? (isStage1HeroNoMeta ? 'justify-center' : 'justify-start') : 'justify-between'}`}
             >
-                <div className={`rounded-full p-[2px] bg-gradient-to-b from-white/35 to-white/10 mx-auto w-fit ${isStage1HeroNoMeta ? 'mt-2' : ''}`}>
-                    <img src={getFullAvatarUrl(player.avatar)} alt={player.name} onError={handleAvatarError} className={`${useLargeHeroIdentity ? 'w-44 h-44' : 'w-30 h-30'} rounded-full border border-white/20 object-cover`} />
+                <div className={`rounded-[2rem] p-[2px] bg-gradient-to-b from-white/35 to-white/10 mx-auto w-fit ${isStage1HeroNoMeta ? 'mt-2' : ''}`}>
+                    <img src={getFullAvatarUrl(player.avatar)} alt={player.name} onError={handleAvatarError} className={`${useLargeHeroIdentity ? 'w-44 h-44' : 'w-30 h-30'} rounded-[1.7rem] border border-white/20 object-cover`} />
                 </div>
 
                 <PlayerIdentity
@@ -1213,7 +1213,7 @@ function PlayerCard({
             transition={MOTION.detail}
             className={`h-full rounded-2xl border ${toneClass} ${isStage7Compact ? 'px-4 py-3' : (isStage6LikeCompact ? 'px-3 py-2.5' : 'px-2.5 py-2')} text-center flex flex-col items-center ${noMeta ? 'justify-center' : ((isStageTopLikeCompact || isStage7Compact) ? 'justify-start' : 'justify-between')}`}
         >
-            <img src={getFullAvatarUrl(player.avatar)} alt={player.name} onError={handleAvatarError} className={`${isStage7Compact ? 'w-[6rem] h-[6rem]' : (noMeta ? 'w-[4.5rem] h-[4.5rem]' : (isStage6LikeCompact ? 'w-[3.75rem] h-[3.75rem]' : 'w-12 h-12'))} rounded-full border border-white/20 object-cover flex-shrink-0`} />
+            <img src={getFullAvatarUrl(player.avatar)} alt={player.name} onError={handleAvatarError} className={`${isStage7Compact ? 'w-[6rem] h-[6rem]' : (noMeta ? 'w-[4.5rem] h-[4.5rem]' : (isStage6LikeCompact ? 'w-[3.75rem] h-[3.75rem]' : 'w-12 h-12'))} rounded-[1.1rem] border border-white/20 object-cover flex-shrink-0`} />
             <PlayerIdentity
                 player={player}
                 compact
