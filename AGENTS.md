@@ -1,213 +1,173 @@
-# AGENTS.md — Codebase Guide for AI Coding Agents
+# AGENTS.md — Codebase Guide for Coding Agents
 
-## Project Overview
+## Overview
+Singer Competition Semifinal visualization system.
+This repo has one React frontend and one Node.js backend:
+- `/admin` — operator-facing control panel
+- `/screen` — audience-facing display
+The app is real-time. State is persisted to `server/data.json` and synchronized to connected clients through Socket.io.
+There is no database.
 
-Singer Competition Semifinal Visualization System. Real-time admin + display panel for a multi-round singer competition (30 contestants). Two sub-apps served from one React app:
-- `/admin` — Admin control panel (score entry, state transitions, player management)
-- `/screen` — Stage display screen (audience-facing)
+## Agent Instruction Sources
+This repository has one agent instruction file: the root `AGENTS.md`.
+Verified absent files:
+- `.cursor/rules/`
+- `.cursorrules`
+- `.github/copilot-instructions.md`
+Treat this file as the single instruction source for agentic coding work in this repo.
 
-Architecture: React+Vite+TailwindCSS v4 frontend (`client/`) + Node.js+Express+Socket.io backend (`server/`). No database — all state is persisted to `server/data.json` and broadcast to all clients via Socket.io.
-
----
-
-## Repo Structure
-
-```
+## Repo Layout
+```text
 /
-├── client/                  # React frontend (Vite + TailwindCSS v4)
+├── client/
 │   ├── src/
-│   │   ├── App.jsx              # Root router (BrowserRouter)
-│   │   ├── components/          # Feature components (AdminRound1, PlayerManager, etc.)
+│   │   ├── App.jsx
+│   │   ├── components/
 │   │   ├── hooks/
-│   │   │   └── useGameState.js  # Central Socket.io state hook
-│   │   ├── pages/               # Route-level page components (Admin, Screen)
+│   │   ├── pages/
 │   │   └── utils/
-│   │       └── avatar.js        # getFullAvatarUrl helper
-│   ├── eslint.config.js         # ESLint v9 flat config
-│   ├── vite.config.js           # Vite + @tailwindcss/vite + @vitejs/plugin-react
-│   └── package.json
+│   ├── eslint.config.js
+│   ├── package.json
+│   └── vite.config.js
 ├── server/
-│   ├── index.js                 # Express + Socket.io server — monolithic (CommonJS)
-│   ├── data.json                # Persisted game state (auto-generated at startup)
+│   ├── data.json
+│   ├── index.js
 │   └── package.json
 └── README.md
 ```
 
----
+## Runtime Architecture
+- Frontend: React 18 + Vite + TailwindCSS v4
+- Backend: Express + Socket.io
+- Persistence: JSON file at `server/data.json`
+- Uploads: avatar images live in `server/uploads/` and are served from `/avatar`
+- Routes live in `client/src/App.jsx`
+- Route pages are `client/src/pages/Admin.jsx` and `client/src/pages/Screen.jsx`
 
-## Build / Dev Commands
-
-### Client (run from `client/`)
+## Build, Lint, Run
+Frontend commands in `client/`:
 ```bash
-npm run dev        # Vite dev server → http://localhost:5173
-npm run build      # Production build → dist/
-npm run preview    # Preview production build
-npm run lint       # ESLint on all .js/.jsx files
+npm run dev
+npm run build
+npm run preview
+npm run lint
 ```
+- `npm run dev` — start Vite dev server
+- `npm run build` — create production build
+- `npm run preview` — preview production build
+- `npm run lint` — run ESLint on the frontend
 
-### Server (run from `server/`)
+Backend command in `server/`:
 ```bash
-node index.js      # Start on port 3001
+node index.js
 ```
+This starts the Express + Socket.io server on port `3001`.
 
-### Testing
-**No test framework is configured.** The server `package.json` has a placeholder `test` script that exits 1. Do not add or run tests unless explicitly asked.
+## Tests
+There is no configured automated test framework in this repository.
+- No supported frontend test command exists
+- No supported backend test command exists
+- No single-test command exists anywhere in the repo
+- `server/package.json` contains only a placeholder `npm test` script that exits with failure
+Do not invent test commands. If a user asks for tests, explain that no automated test suite is currently configured.
 
----
+## Module and Language Boundaries
+- Frontend uses ES modules
+- Backend uses CommonJS
+- The repo uses JavaScript and JSX only
+- Do not introduce TypeScript unless the user explicitly asks for it
+- Use `import` / `export` in `client/`
+- Use `require()` / `module.exports` in `server/`
 
-## Language & Module System
+## Hard Project Constraints
+These are verified repo facts:
+- Keep backend logic in `server/index.js` unless the user explicitly asks for a split
+- TailwindCSS v4 is configured through `@tailwindcss/vite` in `client/vite.config.js`
+- Do not add `tailwind.config.js` unless the project is intentionally reworked
+- Use inline Tailwind utility classes in JSX; do not introduce CSS modules or component-scoped CSS files
+- `useGameState()` is the central synchronization hook
+- Client updates must send the full `gameState` object, not partial patches
+- Socket event names are `requestState`, `stateSync`, and `updateState`
+- State changes are broadcast to all clients after persistence
+- Data persistence is file-based through `server/data.json`
 
-- **Client**: ES Modules (`type: module`). Use `import`/`export` exclusively.
-- **Server**: CommonJS (no `type` field). Use `require()`/`module.exports` exclusively.
-- **No TypeScript** — all files use `.js` or `.jsx`. Do not introduce TypeScript.
-
----
-
-## Code Style Guidelines
-
-### General
-- **Indentation**: 4 spaces (no tabs)
-- **Quotes**: Single quotes for JS string literals; double quotes in JSX attributes
-- **Semicolons**: Always
-- **No TypeScript generics, interfaces, or type annotations** — plain JS throughout
-
-### React Components
-- Functional components only — no class components
-- Use **named `export default function`** pattern:
-  ```jsx
-  export default function AdminRound1({ gameState, updateState }) {
-      // ...
-  }
-  ```
-- Props are destructured directly in the function signature
-- `import React from 'react'` at the top of every `.jsx` file (required by the Babel-based JSX transform)
-- Component files named in **PascalCase**: `AdminRound1.jsx`, `PlayerManager.jsx`
-
-### Event Handlers
-- Arrow functions assigned to `const`, prefixed with `handle`:
-  ```js
-  const handleSelect = (player) => { ... };
-  const handleSubmitScore = () => { ... };
-  ```
-
-### Hooks & State
-- Custom hooks live in `client/src/hooks/`, named `useXxx.js`
-- The `useGameState()` hook is the single source of truth — never duplicate `gameState` in local component state; always read from this hook
-- Optimistic updates: call `updateState(newState)` — it both emits the socket event and updates local state immediately
-- Always pass the **full `gameState` object** to `updateState()` — the server replaces state wholesale, not patch-style
-
-### Utilities
-- Pure utility functions in `client/src/utils/`
-- Prefer `const arrowFn = () => {}` style for exported utility functions
-
-### Server (CommonJS)
-- Keep all server logic in `server/index.js` — do not split unless explicitly asked
-- Socket.io event names: camelCase (`requestState`, `stateSync`, `updateState`)
-- State mutations: always clone the state, then call `saveData()` and `io.emit('stateSync', gameState)` together
-
----
-
-## Styling
-
-- **TailwindCSS v4** via `@tailwindcss/vite` Vite plugin — **no `tailwind.config.js`**
-- Apply classes **inline on JSX elements** — no CSS modules, no styled-components, no CSS files
-- Use `clsx` + `tailwind-merge` for conditional class composition:
-  ```jsx
-  import { clsx } from 'clsx';
-  import { twMerge } from 'tailwind-merge';
-  const cn = (...args) => twMerge(clsx(...args));
-  ```
-- Design palette in use: `slate-800/700/600` backgrounds, `teal-400` accents, `indigo`, `amber`, `red`, `green` status colors
-- Animations via `framer-motion` (already installed)
-
----
-
-## Routing
-
-- React Router v7 (`react-router-dom`)
-- All routes defined in `client/src/App.jsx`: `/admin`, `/screen`, `/`
-- Add new routes by editing `App.jsx` — do not create a separate router config file
-
----
-
-## Real-Time State Architecture
-
-- Single socket (module-level singleton in `useGameState.js`) connects to `http://{window.location.hostname}:3001`
-- **Client → Server**: `updateState(gameState)` event carries the full new state
-- **Server → All Clients**: server saves to `data.json` then emits `stateSync(gameState)` to everyone
-- **Initial load**: client emits `requestState`; server responds with `stateSync` to that socket only
-
----
+## Real-Time State Flow
+1. Client connects to Socket.io
+2. Client requests state with `requestState`
+3. Server responds with `stateSync`
+4. Client calls `updateState(newState)` with the full state object
+5. Server replaces `gameState`, writes it to disk, and emits `stateSync` to all clients
+Do not implement patch-style state updates unless the architecture is deliberately changed.
 
 ## Key Data Shapes
-
+Representative player shape:
 ```js
-// Player object (30 players total)
-{
-    id: 1,
-    name: 'Singer Name',
-    avatar: 'filename.png',          // relative — use getFullAvatarUrl() for display
-    group: 1,                         // group number for Round 1
-    score: 0,
-    status: 'active' | 'eliminated',
-    pkAgainst: null | playerId
-}
-
-// Top-level gameState
-{
-    adminRound: 0 | 1 | 1.5 | 2 | 3 | 4,  // 1.5 = transition between rounds
-    screenRound: ...,
-    currentGroup: Number,
-    pickingChallengerId: null | Number,
-    players: Player[],                      // always 30 entries
-    pkMatches: [{ p1, p2, winner }],
-    demonKingScore: Number
-}
+{ id: 1, name: 'Singer Name', avatar: 'filename.png', group: 1, score: 0, status: 'active', pkAgainst: null }
+```
+Representative top-level state shape:
+```js
+{ adminRound: 0, screenRound: 0, currentGroup: 1, pickingChallengerId: null, players: [], pkMatches: [], demonKingScore: 0 }
+```
+Scoring rule documented in the codebase:
+```js
+finalScore = judgeScore * 0.75 + publicScore * 0.25;
 ```
 
----
+## Verified Coding Conventions
+Observed patterns that are consistently useful:
+- Component and page files use PascalCase, for example `PlayerManager.jsx` and `Admin.jsx`
+- Hook files use `useXxx.js`, for example `useGameState.js`
+- Utility files use camelCase names, for example `avatar.js`
+- Event handlers usually use `handleXxx` naming
+- Functional components are used throughout
+- `export default function ComponentName(...)` is the dominant component pattern
+- Props are often destructured in the function signature
+- Keep transient UI state local with `useState`
+- Treat `useGameState()` as the source of truth for shared competition state
 
-## Naming Conventions
+## Imports, Formatting, Error Handling
+Observed import order is usually:
+1. React and external packages
+2. Internal hooks, components, and utilities
+3. Relative styles or side-effect imports
 
-| Entity              | Convention              | Example                    |
-|---------------------|-------------------------|----------------------------|
-| React components    | PascalCase              | `AdminRound1`              |
-| Component files     | PascalCase + `.jsx`     | `AdminRound1.jsx`          |
-| Hook files          | camelCase `useXxx.js`   | `useGameState.js`          |
-| Utility files       | camelCase + `.js`       | `avatar.js`                |
-| Event handlers      | `handleXxx` arrow const | `handleSubmitScore`        |
-| Socket event names  | camelCase               | `stateSync`, `updateState` |
+Formatting is not consistently enforced across the repo:
+- `import React from 'react'` appears in many JSX files, but not all
+- Semicolons are inconsistent
+- Indentation width is inconsistent
+- Single vs double quote usage is inconsistent
+When editing, follow the style already present in the file you are touching instead of normalizing the whole repo.
 
----
+Error-handling patterns:
+- Client validation commonly uses `alert(...)`
+- Destructive client actions often use `window.confirm(...)`
+- Async client operations usually use `try/catch`, log failures, and show a user-facing alert
+- Server failures are logged with `console.error(...)`
+- HTTP failures typically return JSON via `res.status(...).json({ error: '...' })`
 
-## Error Handling
+## ESLint Notes
+Frontend linting is defined in `client/eslint.config.js`.
+- Uses ESLint v9 flat config
+- Targets `**/*.{js,jsx}`
+- Extends JS recommended, React recommended, and React Hooks recommended rules
+- `react/jsx-no-target-blank` is disabled
+- `react-refresh/only-export-components` is a warning
+Lint checks correctness and React usage more than formatting.
 
-- Client validation: use `alert()` for user-facing errors (established pattern — stay consistent)
-- No global React error boundary is configured
-- Server errors: `console.error()` + `res.status(500).json({ error: '...' })`
-- Wrap all async server operations in `try/catch`; never let unhandled promise rejections crash the server
-- Score calculation pattern: `finalScore = judgeScore * 0.75 + publicScore * 0.25`
+## Agent Guardrails
+- Prefer small, local edits that match the existing file style
+- Do not convert the project to TypeScript
+- Do not add a test framework unless the user requests it
+- Do not refactor `server/index.js` into multiple files unless asked
+- Do not replace full-state socket updates with patch semantics
+- Do not introduce Redux, Zustand, or another global state store for competition state
+- Do not add database dependencies unless the architecture is intentionally changed
 
----
+## Practical Editing Advice
+- For admin/screen behavior, inspect `client/src/pages/Admin.jsx`, `client/src/pages/Screen.jsx`, and `client/src/hooks/useGameState.js` first
+- For state mutations, preserve optimistic local updates on the client and full-state broadcasts from the server
+- For avatar-related work, inspect server upload handling and frontend avatar utilities together
+- When changing competition logic, verify the effect on both admin controls and audience display flows
 
-## ESLint Rules (client)
-
-ESLint v9 flat config (`client/eslint.config.js`):
-- `eslint:recommended` + `react/recommended` + `react-hooks/recommended`
-- JSX Runtime rules enabled (no need to import React for JSX — but `import React from 'react'` is still used per existing files)
-- `react-refresh/only-export-components` — warn (not error)
-- `react/jsx-no-target-blank` — off
-- Target: all `**/*.{js,jsx}` files
-
----
-
-## What NOT to Do
-
-- **No TypeScript** — do not add `.ts`/`.tsx` files or install `typescript`
-- **No test framework** — do not add Jest, Vitest, or any testing library unless asked
-- **Do not split `server/index.js`** into modules unless explicitly instructed
-- **No `tailwind.config.js`** — TailwindCSS v4 is configured via the Vite plugin only
-- **No CSS files or CSS modules** — use Tailwind inline classes exclusively
-- **No global state store** (Redux, Zustand, Context API) — `useGameState` is the pattern
-- **Do not use patches** when calling `updateState` — always send the full `gameState` object
-- **Do not suppress lint errors** with `// eslint-disable` unless there is a documented reason
+## When Unsure
+Prefer the existing runtime architecture over generic abstractions. If a choice conflicts with this guide, follow verified code behavior in the touched files and keep changes minimal.
