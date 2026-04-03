@@ -5,9 +5,12 @@ import { getFullAvatarUrl } from '../../utils/avatar';
 import { formatPlayerNumber } from '../../utils/playerIdentity';
 import PlayerIdentity from '../common/PlayerIdentity';
 
-const STAGE_TOP_ROW = '4%';
-const SLOT_ROW_TOP = '37%';
-const STAGE_BOTTOM_ROW = '74%';
+const STAGE_TOP_ROW = '5%';
+const SLOT_ROW_TOP = '38%';
+const STAGE_BOTTOM_ROW = '72%';
+const STAGE3_TITLE_TOP = '0%';
+const STAGE4_MASTER_TITLE_TOP = '0%';
+const STAGE4_ATTACKER_TITLE_TOP = '97%';
 
 export default function PickOpponent({ gameState }) {
     const { players, pkMatches = [] } = gameState;
@@ -177,6 +180,12 @@ export default function PickOpponent({ gameState }) {
                     <div className="w-full max-w-[98%] mx-auto flex flex-col items-center justify-center -translate-y-8">
                         {isStage3 ? (
                             <div className="relative w-full max-w-[1500px] h-[520px]">
+                                <div
+                                    className="absolute left-1/2 -translate-x-1/2 z-40 text-[42px] font-black tracking-[0.14em] text-white/92 whitespace-nowrap"
+                                    style={{ top: STAGE3_TITLE_TOP }}
+                                >
+                                    大魔王登场
+                                </div>
                                 <motion.div
                                     layout
                                     className="absolute inset-x-0 top-1/2 -translate-y-1/2 w-full max-w-[1380px] mx-auto grid grid-cols-9 grid-rows-2 gap-4"
@@ -186,7 +195,7 @@ export default function PickOpponent({ gameState }) {
                                         const isTop2 = idx < 2;
 
                                         if (isTop2) {
-                                            return <div key={`stage3-gap-${player.id}`} className="aspect-[3/4] rounded-[20px] border border-white/6 bg-white/[0.02] backdrop-blur-[2px]" />;
+                                            return <div key={`stage3-gap-${player.id}`} className="aspect-[3/4] opacity-0 pointer-events-none" />;
                                         }
 
                                         return (
@@ -209,7 +218,7 @@ export default function PickOpponent({ gameState }) {
                                         layout
                                         layoutId={`stage2-card-${top2[0].id}`}
                                         transition={{ layout: { duration: 1.28, ease: [0.25, 0.1, 0.25, 1] } }}
-                                        className="absolute top-1/2 left-1/2 w-[372px] -translate-x-[132%] -translate-y-1/2 z-20"
+                                        className="absolute top-[10%] left-1/2 w-[372px] -translate-x-[132%] z-20"
                                     >
                                         {renderRankCard(top2[0], 'stage2-static', 0, 'hero', null, 'demon')}
                                     </motion.div>
@@ -220,7 +229,7 @@ export default function PickOpponent({ gameState }) {
                                         layout
                                         layoutId={`stage2-card-${top2[1].id}`}
                                         transition={{ layout: { duration: 1.28, ease: [0.25, 0.1, 0.25, 1] } }}
-                                        className="absolute top-1/2 left-1/2 w-[372px] translate-x-[32%] -translate-y-1/2 z-20"
+                                        className="absolute top-[10%] left-1/2 w-[372px] translate-x-[32%] z-20"
                                     >
                                         {renderRankCard(top2[1], 'stage2-static', 1, 'hero', null, 'demon')}
                                     </motion.div>
@@ -363,6 +372,15 @@ export default function PickOpponent({ gameState }) {
                         })}
                     </div>
 
+                    {isStage4 && (
+                        <div
+                            className="absolute left-1/2 -translate-x-1/2 z-[200] text-[38px] font-black tracking-[0.12em] text-white/90 whitespace-nowrap"
+                            style={{ top: STAGE4_MASTER_TITLE_TOP }}
+                        >
+                            擂主
+                        </div>
+                    )}
+
                     <div className="absolute left-[4%] right-[4%] grid grid-cols-8 gap-4" style={{ top: STAGE_BOTTOM_ROW }}>
                         {stageRows.attackers.map((challenger) => {
                             const matchInfo = matchByChallengerId.get(challenger.id);
@@ -392,6 +410,15 @@ export default function PickOpponent({ gameState }) {
                             );
                         })}
                     </div>
+
+                    {isStage4 && (
+                        <div
+                            className="absolute left-1/2 -translate-x-1/2 z-[200] text-[36px] font-black tracking-[0.12em] text-white/86 whitespace-nowrap"
+                            style={{ top: STAGE4_ATTACKER_TITLE_TOP }}
+                        >
+                            攻擂者
+                        </div>
+                    )}
                     </motion.div>
                 </div>
             </LayoutGroup>
