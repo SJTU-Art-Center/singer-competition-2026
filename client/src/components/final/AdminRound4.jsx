@@ -1,293 +1,198 @@
-import { useMemo } from 'react';
-import { getFullAvatarUrl } from '../../utils/avatar';
-import { deriveFinalSettlement } from '../../utils/finalSettlement';
-import PlayerIdentity from '../common/PlayerIdentity';
-
-const FINAL_STAGES = [
-    { value: 1, label: 'Stage 1 · 大魔王亮相', hint: '仅展示2个大魔王，不显示晋级状态' },
-    { value: 2, label: 'Stage 2 · 大魔王分数与晋级', hint: '展示大魔王分数与晋级/待定结果' },
-    { value: 3, label: 'Stage 3 · 8擂主 + 8攻擂者', hint: '双排展示，不显示晋级标签' },
-    { value: 4, label: 'Stage 4 · 8组晋级重排', hint: '晋级擂主/待定擂主/攻擂者三排重排' },
-    { value: 5, label: 'Stage 5 · 待定大魔王聚焦', hint: '隐去晋级擂主，转向待定大魔王与待定擂主' },
-    { value: 6, label: 'Stage 6 · 待定区补位展示', hint: '待定区分数 + 晋级与未晋级两行' },
-    { value: 7, label: 'Stage 7 · 最终阵容', hint: '第一行晋级（前置大魔王/擂主），第二行未晋级' }
-];
+import React, { useMemo } from 'react';
+import PropTypes from 'prop-types';
 
 export default function AdminRound4({ gameState, updateState }) {
-    const finalData = useMemo(() => deriveFinalSettlement(gameState), [gameState]);
+    const players = Array.isArray(gameState?.players) ? gameState.players : [];
+    const pendingPlayers = players.filter(p => p.status === 'pending');
+    const advancedPlayers = players.filter(p => p.status === 'advanced');
+    const remainingSpots = Math.max(0, 10 - advancedPlayers.length);
+    const finalStageIndex = Number(gameState.finalStageIndex ?? 1);
 
-    const {
-        demonKingThreshold,
-        directAdvanced,
-        pendingDemonKings,
-        pendingMasters,
-        challengersByPair,
-        pendingCandidates,
-        remainingSpots,
-        promotedPending,
-        nonPromotedPending,
-        finalTop10,
-        allPlayerResults
-    } = finalData;
-
-    const finalStageIndex = clampStage(gameState.finalStageIndex ?? 1);
-    const screenFinalStageIndex = clampStage(gameState.screenFinalStageIndex ?? finalStageIndex);
-
-    const projectedLabel = FINAL_STAGES.find((item) => item.value === screenFinalStageIndex)?.label || 'Stage 1';
-
-    const stagePendingTotal = useMemo(() => {
-        const merged = [...pendingDemonKings, ...pendingMasters, ...challengersByPair];
-        const seen = new Set();
-        merged.forEach((player) => {
-            if (!player) return;
-            seen.add(player.id);
-        });
-        return seen.size;
-    }, [pendingDemonKings, pendingMasters, challengersByPair]);
-
-    const handleSetEditStage = (stage) => {
-        updateState({ ...gameState, finalStageIndex: stage, resurrectionCalculated: true });
-    };
-
-    const handleProjectStage = (stage) => {
-        updateState({
-            ...gameState,
-            screenRound: 4,
-            screenFinalStageIndex: stage,
-            finalStageIndex: stage,
-            resurrectionCalculated: true,
-            screenDisplayMode: 'live'
-        });
-    };
-
-    const handleProjectCurrentEdit = () => {
-        handleProjectStage(finalStageIndex);
-    };
-
-    const summaryRows = [
-        {
-            title: '直接晋级（大魔王/擂主）',
-            value: `${directAdvanced.length} 人`,
-            tone: 'text-emerald-400'
-        },
-        {
-            title: '待定区总人数',
-            value: `${stagePendingTotal} 人`,
-            tone: 'text-teal-300'
-        },
-        {
-            title: '待定区补位名额',
-            value: `${remainingSpots} 人`,
-            tone: 'text-amber-300'
-        },
-        {
-            title: '待定区补位成功',
-            value: `${promotedPending.length} 人`,
-            tone: 'text-cyan-300'
-        },
-        {
-            title: '最终十强人数',
-            value: `${finalTop10.length} 人`,
-            tone: 'text-teal-200'
-        }
+    const stages = [
+        { id: 1, label: '晋级大魔王展示', icon: '👑' },
+        { id: 2, label: '晋级擂主', icon: '🥇' },
+        { id: 3, label: '待定区展示', icon: '👥' },
+        { id: 4, label: '晋级分流', icon: '⚖️' },
+        { id: 5, label: '十强诞生', icon: '🏆' },
     ];
+
+    const top10Ids = useMemo(() => {
+        const pendingSorted = [...pendingPlayers].sort((a, b) => {
+            const aR2 = a.round2Score ?? a.scoreDK ?? 0;
+            const bR2 = b.round2Score ?? b.scoreDK ?? 0;
+            if (bR2 !== aR2) return bR2 - aR2;
+            if ((b.score ?? 0) !== (a.score ?? 0)) return (b.score ?? 0) - (a.score ?? 0);
+            return (b.judgeScore ?? 0) - (a.judgeScore ?? 0);
+        });
+        const advancedFromPending = pendingSorted.slice(0, remainingSpots);
+        return new Set([
+            ...advancedPlayers.map(p => p.id),
+            ...advancedFromPending.map(p => p.id)
+        ]);
+    }, [pendingPlayers, advancedPlayers, remainingSpots]);
+
+    const round1Sorted = useMemo(() => {
+        return [...players].sort((a, b) => {
+            if ((b.score ?? 0) !== (a.score ?? 0)) return (b.score ?? 0) - (a.score ?? 0);
+            if ((b.judgeScore ?? 0) !== (a.judgeScore ?? 0)) return (b.judgeScore ?? 0) - (a.judgeScore ?? 0);
+            return a.id - b.id;
+        });
+    }, [players]);
+
+    const round2Players = useMemo(() => {
+        const top18 = round1Sorted.slice(0, 18);
+        return top18.map(p => {
+            const r1Rank = round1Sorted.findIndex(s => s.id === p.id) + 1;
+            const isDemonKing = r1Rank <= 2;
+            const isMaster = r1Rank > 2 && r1Rank <= 10;
+            const isChallenger = r1Rank > 10 && r1Rank <= 18;
+
+            const roleName = isDemonKing ? '大魔王' : isMaster ? '擂主' : '攻擂者';
+            let opponentName = '-';
+            if (isDemonKing) {
+                opponentName = '本身是大魔王';
+            } else {
+                const pkMatches = gameState.pkMatches || [];
+                const match = isMaster ? pkMatches.find(m => m.masterId === p.id) : pkMatches.find(m => m.challengerId === p.id);
+                if (match) {
+                    const oppId = isMaster ? match.challengerId : match.masterId;
+                    const opp = players.find(x => x.id === oppId);
+                    opponentName = opp ? `PK对象：${opp.name}` : '未知对象';
+                }
+            }
+
+            let outcomeLabel = '状态未知';
+            if (isDemonKing) {
+                outcomeLabel = p.status === 'advanced' ? '大魔王晋级' : '大魔王落入待定区';
+            } else if (isMaster) {
+                outcomeLabel = p.status === 'advanced' ? '擂主晋级' : '擂主落入待定区';
+            } else if (isChallenger) {
+                outcomeLabel = p.status === 'eliminated' ? '攻擂者淘汰' : '攻擂者进入待定区';
+            }
+
+            const r2Score = p.round2Score ?? p.scoreDK ?? 0;
+            return { ...p, roleName, opponentName, outcomeLabel, r2Score, r1Rank, isTop10: top10Ids.has(p.id) };
+        }).sort((a, b) => {
+            if (b.r2Score !== a.r2Score) return b.r2Score - a.r2Score;
+            if ((b.score ?? 0) !== (a.score ?? 0)) return (b.score ?? 0) - (a.score ?? 0);
+            return (b.judgeScore ?? 0) - (a.judgeScore ?? 0);
+        });
+    }, [round1Sorted, players, gameState.pkMatches, top10Ids]);
 
     return (
         <div className="mt-4 bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-xl">
             <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
-                <h2 className="text-xl font-bold text-teal-400 flex items-center">
-                    <span className="bg-teal-600 text-white w-7 h-7 rounded justify-center items-center flex mr-2 text-xs">4</span>
-                    最终结算控制台：分段投屏 + 晋级原因
+                <h2 className="text-xl font-bold text-amber-400 flex items-center">
+                    <span className="bg-amber-600 text-white w-7 h-7 rounded justify-center items-center flex mr-2 text-xs">4</span>
+                    终极补位阶段控制
                 </h2>
-                <button
-                    onClick={handleProjectCurrentEdit}
-                    className="bg-amber-600/80 hover:bg-amber-500 text-white font-bold px-5 py-1.5 rounded-lg shadow-lg text-sm border border-amber-500 transition-colors"
-                >
-                    📺 投屏当前阶段
-                </button>
+                <div className="flex gap-4 items-center">
+                    <div className="text-sm text-slate-400 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg">
+                        待定区总计: <span className="text-white font-bold">{pendingPlayers.length}</span> 人
+                    </div>
+                    <div className="text-sm text-slate-400 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg">
+                        剩余名额: <span className="text-amber-400 font-bold">{remainingSpots}</span> / 10
+                    </div>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_1fr] gap-4">
-                <div className="bg-slate-900 border border-slate-700 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm text-slate-300 font-bold border-l-4 border-teal-500 pl-2">阶段控制（编辑与投屏）</h3>
-                        <div className="text-xs text-amber-300 font-bold">大屏当前：{projectedLabel}</div>
-                    </div>
+            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-700">
+                <div className="mb-4 text-sm text-slate-400 border-l-4 border-amber-500 pl-2 font-bold tracking-widest">呈现阶段</div>
+                <div className="mb-2 text-xs text-amber-300/80 bg-amber-900/10 border border-amber-600/20 px-3 py-1.5 rounded flex items-center gap-2 w-fit">
+                    <span>💡 选择阶段后请点击顶部「📺 投屏」按钮同步至大屏幕</span>
+                </div>
+                
+                <div className="flex gap-4 mt-6">
+                    {stages.map((stage) => {
+                        const isSelected = finalStageIndex === stage.id;
+                        return (
+                            <button
+                                key={stage.id}
+                                onClick={() => updateState({ ...gameState, finalStageIndex: stage.id })}
+                                className={`flex-1 py-4 px-4 rounded-xl flex flex-col items-center justify-center gap-2 border-2 transition-all ${
+                                    isSelected 
+                                    ? 'bg-amber-600/20 border-amber-400 text-amber-300 ring-4 ring-amber-500/20 shadow-[0_0_20px_rgba(251,191,36,0.3)]' 
+                                    : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-500 hover:bg-slate-700'
+                                }`}
+                            >
+                                <span className="text-2xl">{stage.icon}</span>
+                                <span className="font-bold">Stage {stage.id}</span>
+                                <span className={`text-xs ${isSelected ? 'opacity-100' : 'opacity-60'}`}>{stage.label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {FINAL_STAGES.map((stage) => {
-                            const isEditing = finalStageIndex === stage.value;
-                            const isProjected = screenFinalStageIndex === stage.value && gameState.screenRound === 4;
-
-                            return (
-                                <div key={stage.value} className={`rounded-xl border p-3 ${isEditing ? 'border-teal-400 bg-teal-900/30' : 'border-slate-700 bg-slate-800/70'}`}>
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div>
-                                            <div className="text-sm font-black text-slate-100">{stage.label}</div>
-                                            <div className="text-xs text-slate-400 mt-1">{stage.hint}</div>
-                                        </div>
-                                        <div className="flex flex-col gap-1 items-end">
-                                            {isEditing && <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-500 text-white font-black">编辑中</span>}
-                                            {isProjected && <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-white font-black">大屏中</span>}
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-3 flex gap-2">
-                                        <button
-                                            onClick={() => handleSetEditStage(stage.value)}
-                                            className={`flex-1 text-xs font-bold py-1.5 rounded transition-colors ${isEditing ? 'bg-teal-600 text-white' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}
-                                        >
-                                            设为编辑
-                                        </button>
-                                        <button
-                                            onClick={() => handleProjectStage(stage.value)}
-                                            className={`flex-1 text-xs font-bold py-1.5 rounded transition-colors ${isProjected ? 'bg-amber-600 text-white' : 'bg-amber-700/70 text-amber-100 hover:bg-amber-600'}`}
-                                        >
-                                            立即投屏
-                                        </button>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-2">
-                        {summaryRows.map((item) => (
-                            <div key={item.title} className="rounded-xl border border-slate-700 bg-slate-800/80 p-2 text-center">
-                                <div className="text-[11px] text-slate-400 font-bold">{item.title}</div>
-                                <div className={`text-base font-black mt-1 ${item.tone}`}>{item.value}</div>
+            {/* 完整分数展示大盘 */}
+            <div className="mt-8 flex flex-col gap-4">
+                {/* 模块 1：第一轮 30人 */}
+                <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
+                    <h3 className="text-teal-400 font-bold mb-4 flex items-center gap-2 text-sm">
+                        <span className="opacity-80">第一轮：30人总成绩排名</span>
+                    </h3>
+                    <div className="grid grid-rows-5 grid-flow-col gap-x-3 gap-y-1.5">
+                        {round1Sorted.map((p, index) => (
+                            <div key={p.id} className={`text-xs p-1.5 rounded flex justify-between items-center gap-2 border transition-colors ${
+                                index < 2 ? 'bg-amber-900/20 border-amber-500/30' : 
+                                index < 10 ? 'bg-teal-900/20 border-teal-500/30' : 
+                                index < 18 ? 'bg-blue-900/20 border-blue-500/30' : 'bg-slate-800/80 border-slate-700/50 opacity-60'
+                            }`}>
+                                <span className="text-slate-500 font-mono w-4 shrink-0 px-0.5">{(index+1)}</span>
+                                <span className="text-white font-bold truncate flex-1">{p.name}</span>
+                                <span className="text-slate-300 font-mono">{(p.score ?? 0).toFixed(2)}</span>
                             </div>
                         ))}
                     </div>
-
-                    <div className="mt-3 text-[11px] text-slate-400 leading-relaxed border-t border-slate-700 pt-3">
-                        <div>大魔王守擂线（16人均分）：<span className="font-mono text-teal-300">{demonKingThreshold.toFixed(3)}</span></div>
-                        <div>补位规则：待定区按“最新分数”排序，按名额前 {remainingSpots} 名补位。</div>
-                    </div>
                 </div>
-
-                <div className="bg-slate-900 border border-slate-700 rounded-xl p-4">
-                    <h3 className="text-sm text-slate-300 font-bold border-l-4 border-cyan-500 pl-2 mb-3">待定区补位明细</h3>
-
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-xl border border-teal-700 bg-teal-900/20 p-3">
-                            <div className="text-xs font-black text-teal-300 mb-2">补位晋级 ({promotedPending.length})</div>
-                            <div className="space-y-2 max-h-[220px] overflow-y-auto custom-scrollbar pr-1">
-                                {promotedPending.map((player, idx) => (
-                                    <div key={player.id} className="flex items-center justify-between text-xs border border-teal-700/60 bg-teal-950/30 rounded-lg px-2 py-1">
-                                        <div className="flex items-center gap-2 min-w-0">
-                                            <span className="text-teal-300 font-black w-4 text-center">{idx + 1}</span>
-                                            <img src={getFullAvatarUrl(player.avatar)} alt="" className="w-6 h-6 rounded-full border border-white/20 object-cover" />
-                                            <PlayerIdentity
-                                                player={player}
-                                                compact
-                                                center={false}
-                                                className="min-w-0"
-                                                numberClassName="text-[9px] text-teal-500"
-                                                nameClassName="text-slate-100"
-                                            />
-                                        </div>
-                                        <span className="font-mono text-teal-200">{player.latestScore.toFixed(2)}</span>
+                
+                {/* 模块 2：第二轮 18人成绩明细 */}
+                <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
+                    <h3 className="text-amber-400 font-bold mb-4 flex items-center gap-2 text-sm">
+                        <span className="opacity-80">第二轮：18人成绩与状态明细</span>
+                    </h3>
+                    <div className="grid grid-rows-6 grid-flow-col gap-x-4 gap-y-2">
+                        {round2Players.map((p, index) => (
+                            <div key={p.id} className={`text-xs p-2 rounded flex flex-col gap-1.5 transition-all ${
+                                p.isTop10 
+                                ? 'bg-gradient-to-r from-amber-900/60 to-orange-950/40 border border-amber-500/50 shadow-[0_0_12px_rgba(251,191,36,0.15)] hover:border-amber-400' 
+                                : 'bg-slate-800 border border-slate-700 hover:bg-slate-750'
+                            }`}>
+                                <div className="flex justify-between items-center">
+                                    <div className="flex items-center gap-2 overflow-hidden">
+                                        <span className={`font-mono w-4 shrink-0 ${p.isTop10 ? 'text-amber-500' : 'text-slate-500'}`}>{(index+1)}</span>
+                                        <span className={`font-bold text-[13px] truncate ${p.isTop10 ? 'text-amber-200' : 'text-white'}`}>
+                                            {p.isTop10 && <span className="mr-1">🏆</span>}
+                                            {p.name}
+                                        </span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] shrink-0 ${
+                                            p.roleName === '大魔王' ? 'bg-amber-900/40 text-amber-300' :
+                                            p.roleName === '擂主' ? 'bg-teal-900/40 text-teal-300' : 'bg-blue-900/40 text-blue-300'
+                                        }`}>
+                                            {p.roleName} (R1第{p.r1Rank})
+                                        </span>
                                     </div>
-                                ))}
-                                {promotedPending.length === 0 && <div className="text-xs text-slate-500">无待定区补位晋级</div>}
+                                    <span className="text-amber-300 font-mono font-bold text-sm tracking-wider shrink-0 ml-2">
+                                        {p.r2Score > 0 ? p.r2Score.toFixed(2) : '-'}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-slate-400 truncate flex-1">{p.opponentName}</span>
+                                    <span className={`font-bold tracking-widest shrink-0 ml-2 ${
+                                        p.outcomeLabel.includes('晋级') ? 'text-emerald-400' :
+                                        p.outcomeLabel.includes('淘汰') ? 'text-red-400' : 'text-amber-400'
+                                    }`}>{p.outcomeLabel}</span>
+                                </div>
                             </div>
-                        </div>
-
-                        <div className="rounded-xl border border-slate-700 bg-slate-800/70 p-3">
-                            <div className="text-xs font-black text-slate-300 mb-2">待定未晋级 ({nonPromotedPending.length})</div>
-                            <div className="space-y-2 max-h-[220px] overflow-y-auto custom-scrollbar pr-1">
-                                {nonPromotedPending.map((player, idx) => (
-                                    <div key={player.id} className="flex items-center justify-between text-xs border border-slate-700 bg-slate-900/50 rounded-lg px-2 py-1">
-                                        <div className="flex items-center gap-2 min-w-0">
-                                            <span className="text-slate-400 font-black w-4 text-center">{idx + 1}</span>
-                                            <img src={getFullAvatarUrl(player.avatar)} alt="" className="w-6 h-6 rounded-full border border-white/20 object-cover" />
-                                            <PlayerIdentity
-                                                player={player}
-                                                compact
-                                                center={false}
-                                                className="min-w-0"
-                                                numberClassName="text-[9px] text-slate-500"
-                                                nameClassName="text-slate-100"
-                                            />
-                                        </div>
-                                        <span className="font-mono text-slate-300">{player.latestScore.toFixed(2)}</span>
-                                    </div>
-                                ))}
-                                {nonPromotedPending.length === 0 && <div className="text-xs text-slate-500">无未晋级待定选手</div>}
-                            </div>
-                        </div>
+                        ))}
                     </div>
-                </div>
-            </div>
-
-            <div className="mt-4 bg-slate-900 border border-slate-700 rounded-xl p-4">
-                <h3 className="text-sm text-slate-300 font-bold border-l-4 border-emerald-500 pl-2 mb-3">全员晋级结果与原因（按第一轮排名）</h3>
-
-                <div className="max-h-[420px] overflow-y-auto custom-scrollbar">
-                    <table className="w-full text-sm">
-                        <thead className="sticky top-0 bg-slate-900 z-10">
-                            <tr className="text-left border-b border-slate-700">
-                                <th className="py-2 px-2 text-slate-400 font-bold">R1排名</th>
-                                <th className="py-2 px-2 text-slate-400 font-bold">选手</th>
-                                <th className="py-2 px-2 text-slate-400 font-bold">角色</th>
-                                <th className="py-2 px-2 text-slate-400 font-bold">最新分</th>
-                                <th className="py-2 px-2 text-slate-400 font-bold">结果来源</th>
-                                <th className="py-2 px-2 text-slate-400 font-bold">最终状态</th>
-                                <th className="py-2 px-2 text-slate-400 font-bold">原因</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {allPlayerResults.map((row) => {
-                                const isAdvanced = row.finalStatus === '晋级';
-                                return (
-                                    <tr key={row.id} className="border-b border-slate-800/80 hover:bg-slate-800/40">
-                                        <td className="py-2 px-2 font-mono text-slate-400">#{row.round1Rank}</td>
-                                        <td className="py-2 px-2">
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                <img src={getFullAvatarUrl(row.avatar)} alt="" className="w-7 h-7 rounded-full border border-white/20 object-cover" />
-                                                <PlayerIdentity
-                                                    player={row}
-                                                    compact
-                                                    center={false}
-                                                    className="min-w-0"
-                                                    numberClassName="text-[9px] text-slate-500"
-                                                    nameClassName="font-bold text-slate-100"
-                                                />
-                                            </div>
-                                        </td>
-                                        <td className="py-2 px-2 text-slate-300">{row.role}</td>
-                                        <td className="py-2 px-2 font-mono text-slate-200">{row.latestScore.toFixed(2)}</td>
-                                        <td className="py-2 px-2">
-                                            {row.source ? (
-                                                <span className={`text-[11px] font-black px-2 py-1 rounded ${row.source === '大魔王' ? 'bg-emerald-900/40 text-emerald-300' : row.source === '擂主' ? 'bg-teal-900/40 text-teal-300' : 'bg-cyan-900/40 text-cyan-300'}`}>
-                                                    {row.source}
-                                                </span>
-                                            ) : (
-                                                <span className="text-[11px] text-slate-500">—</span>
-                                            )}
-                                        </td>
-                                        <td className="py-2 px-2">
-                                            <span className={`text-[11px] font-black px-2 py-1 rounded ${isAdvanced ? 'bg-emerald-700/40 text-emerald-200' : 'bg-slate-700/60 text-slate-300'}`}>
-                                                {row.finalStatus}
-                                            </span>
-                                        </td>
-                                        <td className="py-2 px-2 text-xs text-slate-300 leading-relaxed">{row.finalReason}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
     );
 }
 
-function clampStage(value) {
-    const stage = Number(value);
-    if (!Number.isFinite(stage)) return 1;
-    if (stage < 1) return 1;
-    if (stage > 7) return 7;
-    return Math.floor(stage);
-}
+AdminRound4.propTypes = {
+    gameState: PropTypes.object.isRequired,
+    updateState: PropTypes.func.isRequired
+};

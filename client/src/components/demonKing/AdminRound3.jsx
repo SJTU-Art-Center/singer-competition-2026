@@ -33,7 +33,7 @@ export default function AdminRound3({ gameState, updateState }) {
         const dkScore = parseFloat(scoreInput);
         if (isNaN(dkScore)) return alert('请输入有效分数');
         const avg = averageValue;
-        const newStatus = dkScore > avg ? 'advanced' : 'pending';
+        const newStatus = dkScore >= avg ? 'advanced' : 'pending';
         const newPlayers = players.map(p =>
             p.id === selectedDKId ? { ...p, scoreDK: dkScore, status: newStatus } : p
         );
@@ -64,7 +64,7 @@ export default function AdminRound3({ gameState, updateState }) {
             const dk = demonKings.find(d => d.id === p.id);
             if (!dk) return p;
             const dkScore = parseFloat((avg - 3 + Math.random() * 10).toFixed(1));
-            const newStatus = dkScore > avg ? 'advanced' : 'pending';
+            const newStatus = dkScore >= avg ? 'advanced' : 'pending';
             return { ...p, scoreDK: dkScore, status: newStatus };
         });
         updateState({
@@ -121,8 +121,8 @@ export default function AdminRound3({ gameState, updateState }) {
                                     />
                                     <div className="text-xs text-slate-400">第一轮: {dk.score}</div>
                                     {hasValidScore(dk) && (
-                                        <div className={`text-xs font-bold mt-0.5 ${dk.scoreDK > averageValue ? 'text-emerald-400' : 'text-red-400'}`}>
-                                            大魔王分: {dk.scoreDK} {dk.scoreDK > averageValue ? '✅守擂成功' : '❌守擂失败'}
+                                        <div className={`text-xs font-bold mt-0.5 ${dk.scoreDK >= averageValue ? 'text-emerald-400' : 'text-red-400'}`}>
+                                            大魔王分: {dk.scoreDK} {dk.scoreDK >= averageValue ? '✅守擂成功' : '❌守擂失败'}
                                         </div>
                                     )}
                                 </div>
@@ -152,7 +152,7 @@ export default function AdminRound3({ gameState, updateState }) {
                                         nameClassName="text-sm text-white"
                                     />
                                     {hasValidScore(selectedDK) ? (
-                                        <div className={`text-[10px] font-bold text-center ${selectedDK.scoreDK > averageValue ? 'text-emerald-400' : 'text-red-400'}`}>
+                                        <div className={`text-[10px] font-bold text-center ${selectedDK.scoreDK >= averageValue ? 'text-emerald-400' : 'text-red-400'}`}>
                                             {selectedDK.scoreDK}
                                         </div>
                                     ) : (
@@ -186,8 +186,8 @@ export default function AdminRound3({ gameState, updateState }) {
                                 </div>
                             </div>
                             {selectedSubmitted && (
-                                <div className={`text-xs text-center py-1.5 rounded border font-bold ${selectedDK.scoreDK > averageValue ? 'border-emerald-700 text-emerald-400 bg-emerald-900/20' : 'border-red-800 text-red-400 bg-red-900/20'}`}>
-                                    {selectedDK.scoreDK > averageValue ? '✅ 守擂成功（直接晋级）' : '❌ 守擂失败（落入待定）'}
+                                <div className={`text-xs text-center py-1.5 rounded border font-bold ${selectedDK.scoreDK >= averageValue ? 'border-emerald-700 text-emerald-400 bg-emerald-900/20' : 'border-red-800 text-red-400 bg-red-900/20'}`}>
+                                    {selectedDK.scoreDK >= averageValue ? '✅ 守擂成功（直接晋级）' : '❌ 守擂失败（落入待定）'}
                                 </div>
                             )}
                         </div>

@@ -14,8 +14,8 @@ function getCenterOutcomeText({ winner }) {
 
     if (winner === 'master') {
         return [
-            { text: '挑战者进入待定区', variant: 'secondary' },
-            { text: '擂主直接晋级十强', variant: 'primary' }
+            { text: '擂主直接晋级十强', variant: 'primary' },
+            { text: '挑战者淘汰', variant: 'secondary' }
         ];
     }
 
@@ -164,7 +164,7 @@ function BattleCard({ player, roleLabel, role, scoreValue, showScoreRoll, showOu
                         <RollingScore value={scoreValue} active={showScoreRoll} runKey={`${role}-${scoreValue}`} />
                     </motion.div>
                 ) : (
-                <div className="w-full flex items-center justify-center text-[clamp(2rem,3.4vw,3.4rem)] leading-none font-black font-mono tracking-[0.22em] text-white/42 whitespace-nowrap">
+                    <div className="w-full flex items-center justify-center text-[clamp(2rem,3.4vw,3.4rem)] leading-none font-black font-mono tracking-[0.22em] text-white/42 whitespace-nowrap">
                         ???
                     </div>
                 )}

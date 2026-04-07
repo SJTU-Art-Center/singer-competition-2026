@@ -40,3 +40,4 @@ server/data.json
 *.jpeg
 !client/public/background.png
 !client/public/kv.jpg
+.playwright-mcp/

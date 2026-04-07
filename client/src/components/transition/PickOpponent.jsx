@@ -18,8 +18,10 @@ export default function PickOpponent({ gameState }) {
 
     const [stage2ShiftTop18, setStage2ShiftTop18] = useState(false);
 
+    // score = 第一轮总分，永不修改，直接用于排序
     const sortedPlayers = [...players].sort((a, b) => {
         if (b.score !== a.score) return b.score - a.score;
+        if ((b.judgeScore ?? 0) !== (a.judgeScore ?? 0)) return (b.judgeScore ?? 0) - (a.judgeScore ?? 0);
         return a.id - b.id;
     });
     const top18 = sortedPlayers.slice(0, 18);

@@ -55,21 +55,38 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
         if (isNaN(cs) || isNaN(ms)) return alert('请输入有效分数');
         if (cs < 0 || cs > 100 || ms < 0 || ms > 100) return alert('分数必须在 0 到 100 之间');
 
-        let winner = null;
-        let newPlayersState = [...gameState.players];
+        // score = 第一轮总分（永不修改）；判定同分时用它做平局裁定
+        const cPlayer = gameState.players.find(p => p.id === match.challengerId);
+        const mPlayer = gameState.players.find(p => p.id === match.masterId);
 
+        // 胜负判定：先比第二轮分，同分比第一轮总分，再同分比第一轮评委分
+        let winner;
         if (ms > cs) {
             winner = 'master';
+        } else if (ms < cs) {
+            winner = 'both_pending';
+        } else {
+            const cR1 = cPlayer?.score ?? 0;
+            const mR1 = mPlayer?.score ?? 0;
+            if (mR1 !== cR1) {
+                winner = mR1 > cR1 ? 'master' : 'both_pending';
+            } else {
+                winner = (mPlayer?.judgeScore ?? 0) >= (cPlayer?.judgeScore ?? 0) ? 'master' : 'both_pending';
+            }
+        }
+
+        // 只写 round2Score 和 status，score（第一轮总分）绝不修改
+        let newPlayersState = [...gameState.players];
+        if (winner === 'master') {
             newPlayersState = newPlayersState.map(p => {
-                if (p.id === match.masterId) return { ...p, status: 'advanced' };
-                if (p.id === match.challengerId) return { ...p, status: 'eliminated' };
+                if (p.id === match.masterId) return { ...p, status: 'advanced', round2Score: ms };
+                if (p.id === match.challengerId) return { ...p, status: 'eliminated', round2Score: cs };
                 return p;
             });
         } else {
-            winner = 'both_pending';
             newPlayersState = newPlayersState.map(p => {
-                if (p.id === match.masterId) return { ...p, status: 'pending' };
-                if (p.id === match.challengerId) return { ...p, status: 'pending' };
+                if (p.id === match.masterId) return { ...p, status: 'pending', round2Score: ms };
+                if (p.id === match.challengerId) return { ...p, status: 'pending', round2Score: cs };
                 return p;
             });
         }
@@ -105,9 +122,11 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
             status: 'active'
         };
 
+        // 清除 round2Score；score（第一轮总分）从未修改过，无需恢复
         const newPlayers = gameState.players.map((player) => {
             if (player.id === match.challengerId || player.id === match.masterId) {
-                return { ...player, status: 'active' };
+                const { round2Score, ...rest } = player;
+                return { ...rest, status: 'active' };
             }
             return player;
         });
@@ -123,19 +142,32 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
         const newMatches = pkMatches.map(match => {
             const cs = parseFloat((70 + Math.random() * 25).toFixed(1));
             const ms = parseFloat((70 + Math.random() * 25).toFixed(1));
+            const cPlayer = newPlayers.find(p => p.id === match.challengerId);
+            const mPlayer = newPlayers.find(p => p.id === match.masterId);
             let winner;
             if (ms > cs) {
                 winner = 'master';
+            } else if (ms < cs) {
+                winner = 'both_pending';
+            } else {
+                const cR1 = cPlayer?.score ?? 0;
+                const mR1 = mPlayer?.score ?? 0;
+                if (mR1 !== cR1) {
+                    winner = mR1 > cR1 ? 'master' : 'both_pending';
+                } else {
+                    winner = (mPlayer?.judgeScore ?? 0) >= (cPlayer?.judgeScore ?? 0) ? 'master' : 'both_pending';
+                }
+            }
+            if (winner === 'master') {
                 newPlayers = newPlayers.map(p => {
-                    if (p.id === match.masterId) return { ...p, status: 'advanced' };
-                    if (p.id === match.challengerId) return { ...p, status: 'eliminated' };
+                    if (p.id === match.masterId) return { ...p, status: 'advanced', round2Score: ms };
+                    if (p.id === match.challengerId) return { ...p, status: 'eliminated', round2Score: cs };
                     return p;
                 });
             } else {
-                winner = 'both_pending';
                 newPlayers = newPlayers.map(p => {
-                    if (p.id === match.masterId) return { ...p, status: 'pending' };
-                    if (p.id === match.challengerId) return { ...p, status: 'pending' };
+                    if (p.id === match.masterId) return { ...p, status: 'pending', round2Score: ms };
+                    if (p.id === match.challengerId) return { ...p, status: 'pending', round2Score: cs };
                     return p;
                 });
             }

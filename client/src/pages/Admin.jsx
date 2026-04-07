@@ -15,13 +15,9 @@ export default function Admin() {
     const [adminRound1Mode, setAdminRound1Mode] = useState(gameState?.round1Mode || 'group');
 
     const finalStageLabels = {
-        1: '大魔王亮相',
-        2: '大魔王分数与晋级',
-        3: '8擂主+8攻擂者',
-        4: '8组晋级重排',
-        5: '待定大魔王聚焦',
-        6: '待定区补位展示',
-        7: '最终阵容'
+        1: '待定区展示',
+        2: '晋级分流',
+        3: '十强诞生'
     };
 
     if (!gameState) {

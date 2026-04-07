@@ -18,6 +18,7 @@ export default function RankList({ gameState }) {
         ? players.filter(p => (p.group || 1) === currentGroup)
         : [...players].sort((a, b) => {
             if (b.score !== a.score) return b.score - a.score;
+            if ((b.judgeScore ?? 0) !== (a.judgeScore ?? 0)) return (b.judgeScore ?? 0) - (a.judgeScore ?? 0);
             return a.id - b.id;
         });
 
