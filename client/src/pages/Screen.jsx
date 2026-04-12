@@ -55,15 +55,15 @@ export default function Screen() {
                                 || gameState.screenRound === 3
                                 || gameState.screenRound === 4
                             ) && (
-                                <div className="absolute inset-[12px] rounded-[34px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.018),rgba(255,255,255,0.006))] backdrop-blur-[4px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_20px_48px_rgba(2,6,23,0.26)]" />
+                                <div className="absolute inset-[12px] rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]" />
                             )}
                             <div className="relative z-20 px-9 pt-6 shrink-0 pointer-events-none">
                                 <div>
                                     <div className="min-w-0">
-                                        <h1 className="text-[clamp(3.15rem,4.9vw,5rem)] leading-[0.94] font-black tracking-[0.22em] text-transparent bg-clip-text bg-[linear-gradient(to_bottom,var(--title-gradient-from),var(--title-gradient-to))] text-shadow-glow drop-shadow-2xl italic transition-all duration-500">
-                                            &quot;声呼吸&quot;校园歌手大赛
+<h1 className="text-[clamp(2.5rem,4vw,4rem)] leading-[0.94] font-black tracking-[0.22em] text-white/60 transition-all duration-500 text-left italic" style={{ fontFamily: "'HARMONYOS_SANS_SC', sans-serif", fontWeight: 900 }}>
+                                            °声呼吸°校园歌手大赛
                                         </h1>
-                                        <p className={`text-[clamp(0.9rem,1.24vw,1.02rem)] mt-3 font-bold text-[var(--color-text-muted)] tracking-[0.18em] uppercase border-l-4 border-cyan-300/80 pl-4 max-w-[70%] ${gameState.screenRound === 1.5 ? 'opacity-0 h-0 mt-0 overflow-hidden' : ''}`}>
+                                        <p className={`text-[clamp(0.9rem,1.24vw,1.02rem)] mt-3 font-bold text-white/60 tracking-[0.18em] uppercase border-l-4 border-white/30 pl-4 max-w-[70%] ${gameState.screenRound === 1.5 ? 'opacity-0 h-0 mt-0 overflow-hidden' : ''}`}>
                                             {screenSubtitle}
                                         </p>
                                     </div>

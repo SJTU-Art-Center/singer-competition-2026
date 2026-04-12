@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import { getFullAvatarUrl } from '../../utils/avatar';
 import { formatPlayerNumber } from '../../utils/playerIdentity';
-const PANEL_CLASS = 'rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.018),rgba(255,255,255,0.006))] backdrop-blur-[4px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_20px_48px_rgba(2,6,23,0.26)]';
-const CARD_CLASS = 'rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.024),rgba(255,255,255,0.01))] backdrop-blur-[4px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_14px_30px_rgba(2,6,23,0.22)]';
+const PANEL_CLASS = 'rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]';
+const CARD_CLASS = 'rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]';
 
 export default function GroupIntro({ gameState }) {
     const groups = [1, 2, 3, 4, 5, 6].map(g => ({
