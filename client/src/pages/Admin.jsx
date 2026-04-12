@@ -108,7 +108,7 @@ export default function Admin() {
             <div className="flex justify-between items-center mb-6 border-b border-slate-700/80 pb-4">
                 <div>
                     <div className="text-[11px] uppercase tracking-[0.36em] text-slate-400 font-black mb-2">Broadcast Control Deck</div>
-                    <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-cyan-200 to-emerald-300">
+                    <h1 className="text-4xl font-black text-white">
                         控制中心 | 校园歌手大赛
                     </h1>
                 </div>

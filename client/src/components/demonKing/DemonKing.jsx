@@ -44,7 +44,7 @@ export default function DemonKing({ gameState }) {
             <motion.h2
                 initial={{ y: -50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="text-[clamp(1.65rem,3vw,2.25rem)] font-black mt-[clamp(4px,0.8vh,12px)] mb-[clamp(4px,0.8vh,10px)] text-transparent bg-clip-text bg-[linear-gradient(to_bottom,rgba(255,255,255,0.96),rgba(220,240,255,0.72))] tracking-[0.24em] italic drop-shadow-[0_0_18px_rgba(255,255,255,0.12)]"
+                className="text-[clamp(1.65rem,3vw,2.25rem)] font-black mt-[clamp(4px,0.8vh,12px)] mb-[clamp(4px,0.8vh,10px)] text-white tracking-[0.24em] italic"
             >
                 大魔王降临
             </motion.h2>
@@ -59,7 +59,7 @@ export default function DemonKing({ gameState }) {
                             filter: revealedIsFailed ? 'grayscale(60%)' : 'grayscale(0%)'
                         }}
                         transition={{ type: 'spring' }}
-                        className={`min-h-[clamp(330px,44vh,470px)] bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.018))] border rounded-[34px] px-[clamp(28px,3vw,42px)] py-[clamp(24px,3vh,34px)] flex items-stretch gap-[clamp(26px,3vw,48px)] w-full overflow-hidden backdrop-blur-[10px] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_48px_rgba(2,6,23,0.26)] ${revealedIsSuccess ? 'border-white/20' : (revealedIsFailed ? 'border-white/10 opacity-92' : 'border-white/14')}`}
+                        className={`min-h-[clamp(330px,44vh,470px)] bg-white/10 border border-white/20 rounded-[24px] px-[clamp(28px,3vw,42px)] py-[clamp(24px,3vh,34px)] flex items-stretch gap-[clamp(26px,3vw,48px)] w-full overflow-hidden backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] ${revealedIsSuccess ? 'border-white/20' : (revealedIsFailed ? 'border-white/10 opacity-92' : 'border-white/14')}`}
                     >
                         <div className="shrink-0 w-[clamp(220px,24vw,310px)] flex flex-col items-center justify-center gap-[clamp(18px,2.3vh,26px)] py-[clamp(8px,1vh,14px)]">
                             <div className="rounded-[2.1rem] p-[4px] bg-[linear-gradient(180deg,rgba(255,255,255,0.32),rgba(255,255,255,0.08))] shadow-[0_12px_24px_rgba(2,6,23,0.18)]">
@@ -87,7 +87,7 @@ export default function DemonKing({ gameState }) {
 
                             <div className="w-full flex-1 min-h-0 flex flex-col items-center justify-center rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.012))] px-[clamp(20px,2vw,28px)] py-[clamp(22px,3vh,32px)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                                 <div className="text-white/55 font-bold text-[clamp(0.84rem,1vw,0.96rem)] tracking-[0.2em] mb-[clamp(8px,1vh,12px)]">大魔王第二轮得分</div>
-                                <div className="text-[clamp(2.6rem,4.6vw,4.35rem)] leading-none font-mono font-black text-transparent bg-clip-text bg-[linear-gradient(to_bottom,rgba(255,255,255,0.96),rgba(255,255,255,0.58))] text-center">
+                                <div className="text-[clamp(2.6rem,4.6vw,4.35rem)] leading-none font-mono font-black text-white text-center">
                                     {hasDkScore ? (
                                         <AnimatedScore value={finalScore} target={targetScore} isSuccess={isSuccess} onComplete={handleScoreComplete} />
                                     ) : (
@@ -105,7 +105,7 @@ export default function DemonKing({ gameState }) {
                                         initial={{ opacity: 0, y: 50, scale: 0.8 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         transition={{ type: 'spring' }}
-                                        className={`w-full min-h-[clamp(62px,8vh,84px)] px-[clamp(18px,2vw,28px)] py-[clamp(14px,1.8vh,18px)] flex items-center justify-center text-center text-[clamp(1.04rem,1.5vw,1.32rem)] font-black tracking-[0.12em] rounded-[24px] shadow-lg border backdrop-blur-[8px] ${revealedIsSuccess ? 'bg-white/10 border-white/18 text-white shadow-[0_0_28px_rgba(255,255,255,0.14)]' : 'bg-white/6 border-white/12 text-white/82 shadow-[0_0_18px_rgba(255,255,255,0.08)]'}`}
+                                        className={`w-full min-h-[clamp(62px,8vh,84px)] px-[clamp(18px,2vw,28px)] py-[clamp(14px,1.8vh,18px)] flex items-center justify-center text-center text-[clamp(1.04rem,1.5vw,1.32rem)] font-black tracking-[0.12em] rounded-[24px] border bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] ${revealedIsSuccess ? 'border-white/20 text-white' : 'border-white/12 text-white/82'}`}
                                     >
                                         {revealedIsSuccess ? '👑 守擂成功 · 直接晋级 👑' : '🛡️ 守擂失败 · 落入待定区 🛡️'}
                                     </motion.div>
@@ -164,7 +164,7 @@ function AnimatedScore({ value, target, isSuccess, onComplete }) {
         requestAnimationFrame(tick);
     }, [value, target, isSuccess, onComplete]);
 
-    return <span className={`text-transparent bg-clip-text bg-gradient-to-b ${colorClass}`}>{displayValue.toFixed(2)}</span>;
+    return <span className="text-white">{displayValue.toFixed(2)}</span>;
 }
 
 DemonKing.propTypes = {

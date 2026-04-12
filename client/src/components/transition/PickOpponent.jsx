@@ -76,8 +76,8 @@ export default function PickOpponent({ gameState }) {
     const renderRankCard = (player, mode, flipIndex = 0, compactScale = 'normal', flipDelay = null, cardVariant = 'default') => {
         const shouldEliminate = mode === 'stage2-eliminate' && bottom12Ids.has(player.id);
         const cardShell = cardVariant === 'demon'
-            ? 'w-full mx-auto aspect-[3/4] rounded-[45px] border border-white/12 p-6 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.014))] backdrop-blur-[6px] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_48px_rgba(2,6,23,0.26)]'
-            : 'w-full mx-auto aspect-[3/4] rounded-[20px] border border-white/10 p-2.5 bg-[linear-gradient(180deg,rgba(255,255,255,0.024),rgba(255,255,255,0.01))] backdrop-blur-[4px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_14px_30px_rgba(2,6,23,0.22)]';
+            ? 'w-full mx-auto aspect-[3/4] rounded-[24px] border border-white/20 p-6 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]'
+            : 'w-full mx-auto aspect-[3/4] rounded-[24px] border border-white/20 p-2.5 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]';
 
         if (mode === 'stage1-flip') {
             return (
@@ -162,7 +162,7 @@ export default function PickOpponent({ gameState }) {
     };
 
     const renderPkCard = (player) => (
-        <div className="aspect-[5/6] rounded-[20px] border border-white/10 p-2.5 bg-[linear-gradient(180deg,rgba(255,255,255,0.024),rgba(255,255,255,0.01))] backdrop-blur-[4px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_14px_30px_rgba(2,6,23,0.22)]">
+        <div className="aspect-[5/6] rounded-[24px] border border-white/20 p-2.5 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]">
             {renderFace(player)}
         </div>
     );

@@ -68,8 +68,8 @@ const PlayerCard = ({ player, layoutId, showScore, scoreRollActive, scoreValue, 
                 opacity: isEliminatedNode ? 0.6 : 1,
                 y: 0,
             }}
-            transition={slowTransition ? { type: 'spring', stiffness: 60, damping: 14 } : { type: 'spring', stiffness: 200, damping: 25 }}
-            className={`flex flex-col items-center justify-center rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.01))] backdrop-blur-[6px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_14px_30px_rgba(2,6,23,0.22)] overflow-hidden shrink-0 ${xsmall ? 'w-[98px] h-[142px] p-2 gap-1'
+            transition={slowTransition ? { type: 'spring', stiffness: 60, damping: 14, duration: 0.8 } : { type: 'spring', stiffness: 200, damping: 25, duration: 0.8 }}
+            className={`flex flex-col items-center justify-center rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] overflow-hidden shrink-0 transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] ${xsmall ? 'w-[98px] h-[142px] p-2 gap-1'
                 : compact ? 'w-[110px] h-[155px] p-2 gap-1'
                     : xlarge ? 'w-[280px] h-[390px] p-6 gap-3'
                         : mlarge ? 'w-[200px] h-[290px] p-4 gap-2'
@@ -241,7 +241,7 @@ export default function Resurrection({ gameState }) {
                 key={titleText}
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: (isStage4 && s4Phase > 0) ? 0 : 1, y: 0 }}
-                className="text-[clamp(2rem,3.5vw,2.8rem)] font-black mb-8 text-transparent bg-clip-text bg-[linear-gradient(to_bottom,rgba(255,255,255,0.96),rgba(220,240,255,0.72))] tracking-[0.24em] drop-shadow-[0_0_18px_rgba(255,255,255,0.12)]"
+                className="text-[clamp(2rem,3.5vw,2.8rem)] font-black mb-8 text-white tracking-[0.24em]"
             >
                 {titleText}
             </motion.h2>

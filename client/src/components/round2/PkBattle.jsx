@@ -28,8 +28,8 @@ function getCardVariant({ showOutcome, winner, role }) {
             scale: 1,
             opacity: 1,
             y: 0,
-            boxShadow: '0 24px 48px rgba(2,6,23,0.26)',
-            borderColor: 'rgba(255,255,255,0.1)',
+            boxShadow: '0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)',
+            borderColor: 'rgba(255,255,255,0.2)',
             transition: { duration: 0.2 }
         };
     }
@@ -39,8 +39,8 @@ function getCardVariant({ showOutcome, winner, role }) {
             scale: 0.9,
             y: 10,
             opacity: 1,
-            boxShadow: '0 16px 34px rgba(2,6,23,0.16)',
-            borderColor: 'rgba(255,255,255,0.16)',
+            boxShadow: '0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)',
+            borderColor: 'rgba(255,255,255,0.2)',
             transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] }
         };
     }
@@ -51,8 +51,8 @@ function getCardVariant({ showOutcome, winner, role }) {
                 scale: 1.1,
                 y: 0,
                 opacity: 1,
-                boxShadow: '0 0 56px rgba(255,255,255,0.32)',
-                borderColor: 'rgba(255,255,255,0.24)',
+                boxShadow: '0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)',
+                borderColor: 'rgba(255,255,255,0.2)',
                 transition: { duration: 0.76, ease: [0.22, 1, 0.36, 1] }
             };
         }
@@ -61,8 +61,8 @@ function getCardVariant({ showOutcome, winner, role }) {
             scale: 0.9,
             opacity: 0.9,
             y: 0,
-            boxShadow: '0 16px 30px rgba(2,6,23,0.18)',
-            borderColor: 'rgba(255,255,255,0.06)',
+            boxShadow: '0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)',
+            borderColor: 'rgba(255,255,255,0.2)',
             transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] }
         };
     }
@@ -71,8 +71,8 @@ function getCardVariant({ showOutcome, winner, role }) {
         scale: 1,
         opacity: 1,
         y: 0,
-        boxShadow: '0 24px 48px rgba(2,6,23,0.26)',
-        borderColor: 'rgba(255,255,255,0.1)',
+        boxShadow: '0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)',
+        borderColor: 'rgba(255,255,255,0.2)',
         transition: { duration: 0.2 }
     };
 }
@@ -130,13 +130,13 @@ function BattleCard({ player, roleLabel, role, scoreValue, showScoreRoll, showOu
     return (
         <motion.div
             animate={getCardVariant({ showOutcome, winner, role })}
-            className="w-[clamp(273px,26.4vw,370px)] min-h-[clamp(324px,41.4vh,414px)] rounded-[42px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.014))] backdrop-blur-[8px] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_48px_rgba(2,6,23,0.26)] px-[clamp(18px,1.8vw,28px)] py-[clamp(18px,2vh,28px)] flex flex-col items-center overflow-hidden text-[var(--color-text-main)]"
+            className="w-[clamp(273px,26.4vw,370px)] min-h-[clamp(324px,41.4vh,414px)] rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] px-[clamp(18px,1.8vw,28px)] py-[clamp(18px,2vh,28px)] flex flex-col items-center overflow-hidden text-[var(--color-text-main)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]"
         >
             <div className="text-[clamp(0.95rem,1.25vw,1.15rem)] font-black tracking-[0.28em] uppercase text-white/68 text-center">
                 {roleLabel}
             </div>
 
-            <div className="mt-[clamp(14px,1.8vh,22px)] rounded-[32px] p-[4px] bg-[linear-gradient(180deg,rgba(255,255,255,0.3),rgba(255,255,255,0.06))] shadow-[0_14px_28px_rgba(2,6,23,0.2)]">
+            <div className="mt-[clamp(14px,1.8vh,22px)] rounded-[24px] p-[3px] bg-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]">
                 <img
                     src={getFullAvatarUrl(player?.avatar)}
                     alt={getPlayerName(player, role === 'master' ? '未知擂主' : '未知选手')}
@@ -211,9 +211,9 @@ export default function PkBattle({ gameState }) {
 
     return (
         <div className="flex flex-col items-center justify-start w-full h-full pt-[clamp(6px,0.9vh,12px)] pb-[clamp(8px,1.2vh,16px)] overflow-hidden">
-            <h2 className="text-[clamp(1.8rem,3vw,2.3rem)] font-black mt-[clamp(0px,0.3vh,6px)] mb-[clamp(8px,1.2vh,14px)] text-transparent bg-clip-text bg-[linear-gradient(to_right,rgba(255,255,255,0.96),rgba(220,240,255,0.78))] tracking-[0.22em] italic">
-                1V1 BATTLE
-            </h2>
+<h2 className="text-[clamp(1.8rem,3vw,2.3rem)] font-black mt-[clamp(0px,0.3vh,6px)] mb-[clamp(8px,1.2vh,14px)] text-white tracking-[0.22em] italic" style={{ fontFamily: "'HARMONYOS_SANS_SC', sans-serif", fontWeight: 500 }}>
+                                        1V1 BATTLE
+                                    </h2>
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -235,7 +235,7 @@ export default function PkBattle({ gameState }) {
                     <motion.div
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.28, ease: 'easeOut' }}
-                        className="text-[clamp(2.2rem,4vw,3.6rem)] font-black text-transparent bg-clip-text bg-[linear-gradient(to_bottom,rgba(255,255,255,0.94),rgba(255,255,255,0.36))] italic drop-shadow-[0_0_18px_rgba(255,255,255,0.12)]"
+                        className="text-[clamp(2.2rem,4vw,3.6rem)] font-black text-white italic"
                     >
                         VS
                     </motion.div>
@@ -255,7 +255,7 @@ export default function PkBattle({ gameState }) {
                                         key={line.text}
                                         className={line.variant === 'secondary'
                                             ? 'text-[clamp(0.96rem,1.2vw,1.08rem)] font-black italic tracking-[0.1em] leading-[1.45] text-white/52'
-                                            : 'text-[clamp(1.1rem,1.5vw,1.32rem)] font-black italic tracking-[0.12em] leading-[1.5] text-transparent bg-clip-text bg-[linear-gradient(to_bottom,rgba(255,255,255,0.94),rgba(255,255,255,0.46))] drop-shadow-[0_0_14px_rgba(255,255,255,0.14)]'
+                                            : 'text-[clamp(1.1rem,1.5vw,1.32rem)] font-black italic tracking-[0.12em] leading-[1.5] text-white'
                                         }
                                     >
                                         {line.text}
